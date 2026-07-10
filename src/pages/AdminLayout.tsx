@@ -12,7 +12,7 @@ import {
   X,
 } from 'lucide-react';
 
-export type AdminPage = 'dashboard' | 'products' | 'categories' | 'orders';
+export type AdminPage = 'dashboard' | 'products' | 'categories'| 'types' | 'orders';
 
 export default function AdminLayout({
   page,
@@ -30,8 +30,9 @@ export default function AdminLayout({
 
   const nav: { id: AdminPage; label: string; icon: typeof LayoutDashboard }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+     { id: 'categories', label: 'Categories', icon: Tags },
+     { id: 'types', label: 'Types', icon: Tags },
     { id: 'products', label: 'Products', icon: Package },
-    { id: 'categories', label: 'Categories', icon: Tags },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
   ];
 
@@ -42,7 +43,7 @@ export default function AdminLayout({
           <Candy className="w-5 h-5" />
         </div>
         <div>
-          <div className="font-display text-lg font-semibold text-stone-900 leading-none">Mithai Mart</div>
+          <div className="font-display text-lg font-semibold text-stone-900 leading-none">Saatvik sweets</div>
           <div className="text-[11px] text-stone-400 mt-0.5">Admin Console</div>
         </div>
       </div>
@@ -115,7 +116,7 @@ export default function AdminLayout({
             <div className="w-7 h-7 rounded-lg bg-rose-600 flex items-center justify-center text-white">
               <Candy className="w-4 h-4" />
             </div>
-            <span className="font-display font-semibold text-stone-900">Mithai Mart</span>
+            <span className="font-display font-semibold text-stone-900">Saatvik sweets & savouries</span>
           </div>
         </header>
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>

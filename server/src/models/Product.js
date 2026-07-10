@@ -5,9 +5,21 @@ const productSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     description: { type: String, default: '' },
-    price: { type: Number, required: true, min: 0 },
-    weight: { type: String, default: '' },
+variants: [
+  {
+    weight: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+],
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
+    types: { type: mongoose.Schema.Types.ObjectId, ref: "Types", default: null, },
     imageUrl: { type: String, default: '' },
     stock: { type: Number, default: 0, min: 0 },
     isAvailable: { type: Boolean, default: true },

@@ -1,44 +1,31 @@
 import { useEffect, useState } from 'react';
-import axios from "axios";
 import { api } from '../lib/api';
-import { API_URL } from '../lib/config';
 import { useToast } from '../lib/toast';
-import type { Category } from '../lib/types';
-import { Tags, Plus, Pencil, Trash2, X, Loader2, Search,Image as ImageIcon } from 'lucide-react';
+import type { Types } from "../lib/types";
 import Modal from '../lib/modal';
-type FormState = { name: string; description: string; imageUrl: string; sortOrder: number; isActive: boolean };
+import { Tags, Plus, Pencil, Trash2, X, Loader2, Search } from 'lucide-react';
 
-const empty: FormState = { name: '', description: '', imageUrl: '', sortOrder: 0, isActive: true };
+type FormState = { category: string; name: string; description: string; imageUrl: string; sortOrder: number; isActive: boolean };
 
-export default function CategoriesPage() {
+const empty: FormState = { category: "", name: '', description: '', imageUrl: '', sortOrder: 0, isActive: true };
+export default function TypesPage() {
   const toast = useToast();
-  const [rows, setRows] = useState<Category[]>([]);
+  const [rows, setRows] = useState<Types[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
-  const [editing, setEditing] = useState<Category | null>(null);
+  const [editing, setEditing] = useState<Types | null>(null);
   const [form, setForm] = useState<FormState>(empty);
   const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
-const [selectedImage, setSelectedImage] = useState<File | null>(null);
+const [categories, setCategories] = useState([]);
 
-const [preview,setPreview]=useState("");
-// const handleImage = (
-//     e: React.ChangeEvent<HTMLInputElement>
-// ) => {
-
-//     const file = e.target.files?.[0];
-
-//     if (!file) return;
-
-//     setSelectedImage(file);
-
-//     setPreview(URL.createObjectURL(file));
-
-// };
+useEffect(() => {
+  api.get("/categories").then(setCategories);
+}, []);
   const load = async () => {
     setLoading(true);
     try {
-      const data = await api.get<Category[]>('/categories');
+      const data = await api.get<Category[]>('/types');
       setRows(data);
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
@@ -48,73 +35,43 @@ const [preview,setPreview]=useState("");
 
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditing(null); setForm(empty); setShowModal(true);setSelectedImage(null);
+  const openNew = () => { setEditing(null); setForm(empty); setShowModal(true); };
 
-setPreview(""); };
+const openEdit = (c: Types) => {
+  setEditing(c);
 
-  const openEdit = (c: Category) => {
-    setEditing(c);
-    setForm({ name: c.name, description: c.description, imageUrl: c.imageUrl, sortOrder: c.sortOrder, isActive: c.isActive });
-    setPreview(
-    c.imageUrl
-        ? `${API_URL}${c.imageUrl}`
-        : ""
-);
-    setShowModal(true);
-  };
+  setForm({
+    category: c.category?._id || "",
+    name: c.name,
+    description: c.description,
+    imageUrl: c.imageUrl,
+    sortOrder: c.sortOrder,
+    isActive: c.isActive,
+  });
+
+  setShowModal(true);
+};
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
     setSaving(true);
     try {
-      let imageUrl = form.imageUrl;
-      const oldImage = editing?.imageUrl;
-      if (selectedImage) {
-
-    const formData = new FormData();
-
-    formData.append("image", selectedImage);
-
-    formData.append("folder", "categories");
-
-    const uploadResponse = await axios.post(
-        `${API_URL}/api/upload`,
-        formData
-        
-    );
-
-    imageUrl = uploadResponse.data.imageUrl;
-
-}
-const payload = {
-  name: form.name.trim(),
-  description: form.description.trim(),
-  imageUrl: imageUrl, // uploaded image path
-  sortOrder: Number(form.sortOrder) || 0,
-  isActive: form.isActive,
-};
+      const payload = {
+        category: form.category,
+        name: form.name.trim(),
+        description: form.description.trim(),
+        imageUrl: form.imageUrl.trim(),
+        sortOrder: Number(form.sortOrder) || 0,
+        isActive: form.isActive,
+      };
       if (editing) {
-        await api.put(`/categories/${editing._id}`, payload);
-        if (
-  editing &&
-  oldImage &&
-  oldImage !== imageUrl
-) {
-  await axios.delete(`${API_URL}/api/upload`, {
-    data: {
-      imageUrl: oldImage,
-    },
-  });
-}
+        await api.put(`/types/${editing._id}`, payload);
       } else {
-        await api.post('/categories', payload);
+        await api.post('/types', payload);
       }
-      toast({ message: editing ? 'Category updated' : 'Category created', type: 'success' });
+      toast({ message: editing ? 'Type updated' : 'Type created', type: 'success' });
       setShowModal(false);
-      setSelectedImage(null);
-setPreview("");
-setForm(empty);
       load();
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
@@ -122,11 +79,11 @@ setForm(empty);
     setSaving(false);
   };
 
-  const remove = async (c: Category) => {
-    if (!confirm(`Delete category "${c.name}"?`)) return;
+  const remove = async (c: Types) => {
+    if (!confirm(`Delete type "${c.name}"?`)) return;
     try {
-      await api.del(`/categories/${c._id}`);
-      toast({ message: 'Category deleted', type: 'success' });
+      await api.del(`/types/${c._id}`);
+      toast({ message: 'Type deleted', type: 'success' });
       load();
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
@@ -139,10 +96,10 @@ setForm(empty);
     <div className="space-y-6 animate-fade-up">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold text-stone-900">Categories</h1>
-          <p className="text-stone-500 mt-1">Organize your sweets into collections.</p>
+          <h1 className="font-display text-3xl font-semibold text-stone-900">Types</h1>
+          <p className="text-stone-500 mt-1">Manage product types.</p>
         </div>
-        <button onClick={openNew} className="btn-primary"><Plus className="w-4 h-4" /> New category</button>
+        <button onClick={openNew} className="btn-primary"><Plus className="w-4 h-4" />New Type</button>
       </div>
 
       <div className="card overflow-hidden">
@@ -165,7 +122,7 @@ setForm(empty);
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-stone-500 border-b border-stone-100 bg-stone-50/50">
-                  <th className="px-5 py-3 font-medium">Category</th>
+                  <th className="px-5 py-3 font-medium">Type</th>
                   <th className="px-5 py-3 font-medium">Description</th>
                   <th className="px-5 py-3 font-medium">Order</th>
                   <th className="px-5 py-3 font-medium">Status</th>
@@ -178,12 +135,15 @@ setForm(empty);
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         {c.imageUrl ? (
-                          <img src={`${API_URL}${c.imageUrl}`}alt={c.name} className="w-10 h-10 rounded-lg object-cover" />
+                          <img src={c.imageUrl} alt={c.name} className="w-10 h-10 rounded-lg object-cover" />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400"><Tags className="w-4 h-4" /></div>
                         )}
                         <div>
                           <div className="font-medium text-stone-800">{c.name}</div>
+                          <div className="text-xs text-stone-400">
+  {c.category?.name}
+</div>
                           <div className="text-xs text-stone-400">/{c.slug}</div>
                         </div>
                       </div>
@@ -210,8 +170,34 @@ setForm(empty);
       </div>
 
       {showModal && (
-        <Modal onClose={() => setShowModal(false)} title={editing ? 'Edit category' : 'New category'}>
+        <Modal onClose={() => setShowModal(false)} title={editing ? 'Edit Type' : 'New Type'}>
           <form onSubmit={save} className="space-y-4">
+            <div>
+  <label className="label">Category</label>
+
+  <select
+    value={form.category}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        category: e.target.value,
+      })
+    }
+    className="input"
+    required
+  >
+    <option value="">Select Category</option>
+
+    {categories.map((category: any) => (
+      <option
+        key={category._id}
+        value={category._id}
+      >
+        {category.name}
+      </option>
+    ))}
+  </select>
+</div>
             <div>
               <label className="label">Name</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="input" placeholder="Dry Fruit Sweets" />
@@ -220,59 +206,10 @@ setForm(empty);
               <label className="label">Description</label>
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="input resize-none" placeholder="A short blurb shown on the storefront" />
             </div>
-  <div>
-  <label className="label">Category Image</label>
-
-  <label className="border-2 border-dashed border-stone-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-rose-500 transition">
-
-    {preview ? (
-      <img
-        src={preview}
-        className="w-36 h-36 object-cover rounded-lg"
-      />
-    ) : (
-      <>
-        <ImageIcon className="w-10 h-10 text-stone-400 mb-2" />
-
-        <p className="text-sm text-stone-500">
-          Click to upload category image
-        </p>
-      </>
-    )}
-
-    <input
-      type="file"
-      accept="image/*"
-      className="hidden"
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-
-        if (!file) return;
-
-        setSelectedImage(file);
-
-        setPreview(URL.createObjectURL(file));
-      }}
-    />
-  </label>
-
-  {preview && (
-    <button
-      type="button"
-      onClick={() => {
-        setSelectedImage(null);
-        setPreview("");
-          setForm({
-    ...form,
-    imageUrl: "",
-  });
-      }}
-      className="mt-3 text-sm text-red-600"
-    >
-      Remove Image
-    </button>
-  )}
-</div>
+            <div>
+              <label className="label">Image URL</label>
+              <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} className="input" placeholder="https://images.pexels.com/..." />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label">Sort order</label>
@@ -290,7 +227,7 @@ setForm(empty);
               <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">Cancel</button>
               <button type="submit" disabled={saving} className="btn-primary">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                {editing ? 'Save changes' : 'Create category'}
+                {editing ? 'Save changes' : 'Create type'}
               </button>
             </div>
           </form>
@@ -302,9 +239,9 @@ setForm(empty);
 
 // export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
 //   return (
-//     <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto p-6">
+//     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 //       <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={onClose} />
-//       <div className="relative mt-10 mb-10 w-full max-w-2xl rounded-2xl bg-white shadow-2xl p-6 overflow-visible animate-scale-in">
+//       <div className="relative w-full max-w-lg card p-6 max-h-[90vh] overflow-y-auto animate-scale-in">
 //         <div className="flex items-center justify-between mb-5">
 //           <h2 className="font-display text-xl font-semibold text-stone-900">{title}</h2>
 //           <button onClick={onClose} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600"><X className="w-5 h-5" /></button>

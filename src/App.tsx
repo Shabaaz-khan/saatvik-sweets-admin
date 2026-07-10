@@ -7,6 +7,7 @@ import AdminLayout, { type AdminPage } from './pages/AdminLayout';
 import DashboardPage from './pages/DashboardPage';
 import ProductsPage from './pages/ProductsPage';
 import CategoriesPage from './pages/CategoriesPage';
+import TypesPage from './pages/TypesPage';
 import OrdersPage from './pages/OrdersPage';
 import StorePage from './pages/StorePage';
 import { Candy, Loader2 } from 'lucide-react';
@@ -42,8 +43,9 @@ function AppShell() {
   return (
     <AdminLayout page={adminPage} onNavigate={setAdminPage} onGoStore={() => setView('store')}>
       {adminPage === 'dashboard' && <DashboardPage onNavigate={(p) => setAdminPage(p)} />}
+         {adminPage === 'categories' && <CategoriesPage />}
+         {adminPage === "types" && <TypesPage />}
       {adminPage === 'products' && <ProductsPage />}
-      {adminPage === 'categories' && <CategoriesPage />}
       {adminPage === 'orders' && <OrdersPage />}
     </AdminLayout>
   );

@@ -1,13 +1,15 @@
 import 'dotenv/config';
 import express from 'express';
+// import path from "path";
 import cors from 'cors';
 import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import categoryRoutes from './routes/categories.js';
+import typesRoutes from './routes/types.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import razorpayRoutes from './routes/razorpay.js';
-
+import uploadRoutes from './routes/upload.js';
 const app = express();
 
 app.use(cors({
@@ -15,15 +17,16 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
-
+app.use("/uploads", express.static("uploads"));
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use("/api/types", typesRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/razorpay', razorpayRoutes);
-
+app.use('/api/upload', uploadRoutes);
 // Central error handler
 app.use((err, _req, res, _next) => {
   console.error(err);
@@ -36,7 +39,8 @@ const MONGODB_URI = process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/mithai
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    console.log('MongoDB connected:', MONGODB_URI);
+    // console.log('MongoDB connected:', MONGODB_URI);
+    console.log("✅ MongoDB Connected");
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
   })
   .catch((err) => {

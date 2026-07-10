@@ -71,7 +71,7 @@ export default function StorePage({ onGoAdmin }: { onGoAdmin: () => void }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <button onClick={() => { setView('shop'); }} className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-rose-600 flex items-center justify-center text-white"><Candy className="w-5 h-5" /></div>
-            <span className="font-display text-xl font-semibold text-stone-900">Mithai Mart</span>
+            <span className="font-display text-xl font-semibold text-stone-900">Saatvik sweets & savouries</span>
           </button>
           <div className="flex items-center gap-2">
             <button onClick={onGoAdmin} className="hidden sm:inline-flex btn-ghost text-sm">Admin</button>
@@ -179,7 +179,7 @@ export default function StorePage({ onGoAdmin }: { onGoAdmin: () => void }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 text-center text-sm text-stone-400">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <div className="w-7 h-7 rounded-lg bg-rose-600 flex items-center justify-center text-white"><Candy className="w-4 h-4" /></div>
-                <span className="font-display font-semibold text-stone-700">Mithai Mart</span>
+                <span className="font-display font-semibold text-stone-700">Saatvik sweets & savouries</span>
               </div>
               <p>Made with love &amp; pure ghee. Powered by Razorpay secure payments.</p>
             </div>
@@ -323,7 +323,7 @@ function CheckoutView({ onBack, onSuccess }: { onBack: () => void; onSuccess: (d
           key: created.razorpay_key_id,
           amount: created.amount,
           currency: created.currency,
-          name: 'Mithai Mart',
+          name: 'Saatvik sweets & savouries',
           description: 'Sweet order',
           order_id: created.razorpay_order_id,
           prefill: { name: form.name, email: form.email, contact: form.phone },

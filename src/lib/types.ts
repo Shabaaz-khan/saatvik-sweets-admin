@@ -1,9 +1,10 @@
-export type Category = {
+export type Types = {
   _id: string;
   name: string;
   slug: string;
   description: string;
   imageUrl: string;
+  category: Category | null;
   sortOrder: number;
   isActive: boolean;
   createdAt: string;
@@ -15,19 +16,29 @@ export type Product = {
   name: string;
   slug: string;
   description: string;
-  price: number;
+variants: {
   weight: string;
-  category: string | null;
-  imageUrl: string;
-  stock: number;
-  isAvailable: boolean;
-  isFeatured: boolean;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
-  categoryData?: Category | null;
-};
+  price: number;
+}[];
 
+  category: Category | null;
+
+  types: Types | null;
+
+  imageUrl: string;
+
+  stock: number;
+
+  isAvailable: boolean;
+
+  isFeatured: boolean;
+
+  sortOrder: number;
+
+  createdAt: string;
+
+  updatedAt: string;
+};
 export type OrderStatus = 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 export type PaymentStatus = 'unpaid' | 'paid' | 'failed' | 'refunded';
 

@@ -36,7 +36,7 @@ export default function LoginPage({ onGoStore }: { onGoStore: () => void }) {
             <div className="w-11 h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
               <Candy className="w-6 h-6" />
             </div>
-            <span className="font-display text-2xl font-semibold tracking-tight">Mithai Mart</span>
+            <span className="font-display text-2xl font-semibold tracking-tight">Saatvik sweets & savouries</span>
           </div>
         </div>
         <div className="relative space-y-5">
@@ -58,7 +58,7 @@ export default function LoginPage({ onGoStore }: { onGoStore: () => void }) {
             <div className="w-10 h-10 rounded-xl bg-rose-600 flex items-center justify-center text-white">
               <Candy className="w-5 h-5" />
             </div>
-            <span className="font-display text-xl font-semibold text-stone-800">Mithai Mart</span>
+            <span className="font-display text-xl font-semibold text-stone-800">Saatvik sweets & savouries</span>
           </div>
 
           <h2 className="font-display text-3xl font-semibold text-stone-900">

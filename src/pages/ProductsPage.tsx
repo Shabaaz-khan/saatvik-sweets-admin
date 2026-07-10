@@ -1,33 +1,54 @@
 import { useEffect, useState } from 'react';
+import axios from "axios";
 import { api } from '../lib/api';
+import { API_URL } from '../lib/config';
 import { useToast } from '../lib/toast';
 import { formatINR } from '../lib/format';
-import type { Product, Category } from '../lib/types';
-import { Modal } from './CategoriesPage';
-import { Package, Plus, Pencil, Trash2, Loader2, Search, Star, Check } from 'lucide-react';
+import type { Product, Category, Types } from '../lib/types';
+import Modal from '../lib/modal';
+import { Package, Plus, Pencil, Trash2, Loader2, Search, Star, Check,Upload, X,Image as ImageIcon  } from 'lucide-react';
 
 type FormState = {
   name: string;
   description: string;
-  price: string;
-  weight: string;
   category: string;
+  types: string;
   imageUrl: string;
   stock: string;
   isAvailable: boolean;
   isFeatured: boolean;
   sortOrder: number;
+
+  variants: {
+    weight: string;
+    price: string;
+  }[];
 };
 
 const empty: FormState = {
-  name: '', description: '', price: '', weight: '', category: '', imageUrl: '',
-  stock: '0', isAvailable: true, isFeatured: false, sortOrder: 0,
+  name: "",
+  description: "",
+  category: "",
+  types: "",
+  imageUrl: "",
+  stock: "0",
+  isAvailable: true,
+  isFeatured: false,
+  sortOrder: 0,
+
+  variants: [
+    {
+      weight: "",
+      price: "",
+    },
+  ],
 };
 
 export default function ProductsPage() {
   const toast = useToast();
   const [rows, setRows] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [types, setTypes] = useState<Types[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [filterCat, setFilterCat] = useState('all');
@@ -35,16 +56,20 @@ export default function ProductsPage() {
   const [form, setForm] = useState<FormState>(empty);
   const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
+const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
+const [preview, setPreview] = useState("");
   const load = async () => {
     setLoading(true);
     try {
-      const [products, cats] = await Promise.all([
+      const [products, cats, types] = await Promise.all([
         api.get<Product[]>('/products'),
         api.get<Category[]>('/categories'),
+          api.get<Types[]>("/types"),
       ]);
       setRows(products);
       setCategories(cats);
+      setTypes(types);
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
     }
@@ -53,41 +78,119 @@ export default function ProductsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditing(null); setForm(empty); setShowModal(true); };
-  const openEdit = (p: Product) => {
+const openNew = () => {
+
+  setEditing(null);
+
+  setForm(empty);
+
+  setSelectedImage(null);
+
+  setPreview("");
+
+  setShowModal(true);
+
+};  
+const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({
-      name: p.name, description: p.description, price: String(p.price), weight: p.weight,
-      category: p.category ?? '', imageUrl: p.imageUrl, stock: String(p.stock),
-      isAvailable: p.isAvailable, isFeatured: p.isFeatured, sortOrder: p.sortOrder,
-    });
+setForm({
+  name: p.name,
+  description: p.description,
+  category: p.category?._id || "",
+  types: p.types?._id || "",
+  imageUrl: p.imageUrl,
+  stock: String(p.stock),
+  isAvailable: p.isAvailable,
+  isFeatured: p.isFeatured,
+  sortOrder: p.sortOrder,
+
+  variants:
+    p.variants && p.variants.length > 0
+      ? p.variants.map((v) => ({
+          weight: v.weight,
+          price: String(v.price),
+        }))
+      : [{ weight: "", price: "" }],
+});
+setPreview(
+  p.imageUrl
+    ? `${API_URL}${p.imageUrl}`
+    : ""
+);
+
+setSelectedImage(null);
     setShowModal(true);
   };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.price) return;
-    setSaving(true);
+if (
+  !form.name.trim() ||
+  form.variants.length === 0 ||
+  form.variants.some(v => !v.weight || !v.price)
+) {
+  return;
+}    setSaving(true);
+    let imageUrl = form.imageUrl;
+    const oldImage = form.imageUrl;
+    if (selectedImage) {
+
+    const formData = new FormData();
+
+    formData.append("image", selectedImage);
+
+    formData.append("folder", "products");
+
+    const upload = await axios.post(
+    `${API_URL}/api/upload`,
+    formData
+);
+
+    imageUrl = upload.data.imageUrl;
+
+}
     try {
-      const payload = {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        price: Number(form.price),
-        weight: form.weight.trim(),
-        category: form.category || null,
-        imageUrl: form.imageUrl.trim(),
-        stock: Number(form.stock) || 0,
-        isAvailable: form.isAvailable,
-        isFeatured: form.isFeatured,
-        sortOrder: Number(form.sortOrder) || 0,
-      };
+const payload = {
+  name: form.name.trim(),
+  description: form.description.trim(),
+variants: form.variants.map(v => ({
+  weight: v.weight,
+  price: Number(v.price),
+})),
+  category: form.category || null,
+  types: form.types || null,
+imageUrl,
+  stock: Number(form.stock) || 0,
+  isAvailable: form.isAvailable,
+  isFeatured: form.isFeatured,
+  sortOrder: Number(form.sortOrder) || 0,
+};
       if (editing) {
+        
         await api.put(`/products/${editing._id}`, payload);
+         if (
+        oldImage &&
+        oldImage !== imageUrl
+    ) {
+        await axios.delete(
+            `${API_URL}/api/upload`,
+            {
+                data: {
+                    imageUrl: oldImage,
+                },
+            }
+        );
+    }
       } else {
         await api.post('/products', payload);
       }
       toast({ message: editing ? 'Product updated' : 'Product created', type: 'success' });
       setShowModal(false);
+      setSelectedImage(null);
+
+setPreview("");
+
+setForm(empty);
       load();
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
@@ -98,22 +201,33 @@ export default function ProductsPage() {
   const remove = async (p: Product) => {
     if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
     try {
-      await api.del(`/products/${p._id}`);
-      toast({ message: 'Product deleted', type: 'success' });
+if (p.imageUrl) {
+  await axios.delete(`${API_URL}/api/upload`, {
+    data: {
+      imageUrl: p.imageUrl,
+    },
+  });
+}
+
+await api.del(`/products/${p._id}`);     
+ toast({ message: 'Product deleted', type: 'success' });
       load();
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
     }
   };
 
-  const catName = (id: string | null) => categories.find((c) => c._id === id)?.name ?? '—';
 
   const filtered = rows.filter((r) => {
     const matchQ = r.name.toLowerCase().includes(query.toLowerCase());
-    const matchC = filterCat === 'all' || r.category === filterCat;
+    const matchC =
+    filterCat === "all" ||
+    r.category?._id === filterCat;
     return matchQ && matchC;
   });
-
+const filteredTypes = types.filter(
+  (t) => t.category?._id === form.category
+);
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -150,6 +264,7 @@ export default function ProductsPage() {
                 <tr className="text-left text-stone-500 border-b border-stone-100 bg-stone-50/50">
                   <th className="px-5 py-3 font-medium">Product</th>
                   <th className="px-5 py-3 font-medium">Category</th>
+                  <th className="px-5 py-3 font-medium"> Type </th>
                   <th className="px-5 py-3 font-medium">Price</th>
                   <th className="px-5 py-3 font-medium">Stock</th>
                   <th className="px-5 py-3 font-medium">Status</th>
@@ -162,7 +277,11 @@ export default function ProductsPage() {
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         {p.imageUrl ? (
-                          <img src={p.imageUrl} alt={p.name} className="w-11 h-11 rounded-lg object-cover" />
+                          <img
+  src={`${API_URL}${p.imageUrl}`}
+  alt={p.name}
+  className="w-11 h-11 rounded-lg object-cover"
+/>
                         ) : (
                           <div className="w-11 h-11 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400"><Package className="w-4 h-4" /></div>
                         )}
@@ -171,12 +290,22 @@ export default function ProductsPage() {
                             {p.name}
                             {p.isFeatured && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />}
                           </div>
-                          {p.weight && <div className="text-xs text-stone-400">{p.weight}</div>}
-                        </div>
+<div className="text-xs text-stone-400">
+  {p.variants?.find(v => v.weight === "1kg")?.weight ??
+    p.variants?.[0]?.weight ??
+    "—"}
+</div>                        </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-stone-500">{catName(p.category)}</td>
-                    <td className="px-5 py-3.5 font-medium text-stone-800">{formatINR(Number(p.price))}</td>
+                    <td className="px-5 py-3.5 text-stone-500">{p.category?.name || "—"}</td>
+                    <td className="px-5 py-3.5 text-stone-500"> {p.types?.name || "—"} </td>
+                    <td className="px-5 py-3.5 font-medium text-stone-800">{formatINR(
+  Number(
+    p.variants?.find(v => v.weight === "1kg")?.price ??
+    p.variants?.[0]?.price ??
+    0
+  )
+)}</td>
                     <td className="px-5 py-3.5">
                       <span className={Number(p.stock) <= 5 ? 'text-rose-600 font-medium' : 'text-stone-600'}>{p.stock}</span>
                     </td>
@@ -211,31 +340,178 @@ export default function ProductsPage() {
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="input resize-none" placeholder="Rich cashew-based silver-leafed sweet…" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="label">Price (₹)</label>
-                <input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required className="input" placeholder="450" />
-              </div>
-              <div>
-                <label className="label">Weight</label>
-                <input value={form.weight} onChange={(e) => setForm({ ...form, weight: e.target.value })} className="input" placeholder="500g" />
-              </div>
+<div className="space-y-3">
+
+  <div className="flex items-center justify-between">
+    <label className="label">Weight & Price Variants</label>
+
+    <button
+      type="button"
+      onClick={() =>
+        setForm({
+          ...form,
+          variants: [
+            ...form.variants,
+            { weight: "", price: "" },
+          ],
+        })
+      }
+      className="btn-secondary"
+    >
+      <Plus className="w-4 h-4" />
+      Add Variant
+    </button>
+  </div>
+
+  {form.variants.map((variant, index) => (
+    <div
+      key={index}
+      className="grid grid-cols-[1fr_1fr_auto] gap-3"
+    >
+      <input
+        className="input"
+        placeholder="250g"
+        value={variant.weight}
+        onChange={(e) => {
+          const variants = [...form.variants];
+          variants[index].weight = e.target.value;
+          setForm({ ...form, variants });
+        }}
+      />
+
+      <input
+        className="input"
+        placeholder="₹180"
+        type="number"
+        value={variant.price}
+        onChange={(e) => {
+          const variants = [...form.variants];
+          variants[index].price = e.target.value;
+          setForm({ ...form, variants });
+        }}
+      />
+
+      {form.variants.length > 1 && (
+        <button
+          type="button"
+          onClick={() => {
+            const variants = form.variants.filter(
+              (_, i) => i !== index
+            );
+
+            setForm({
+              ...form,
+              variants,
+            });
+          }}
+          className="p-3 rounded-lg bg-red-50 text-red-600"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  ))}
+
+</div>
               <div>
                 <label className="label">Category</label>
-                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="input">
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value, types: "" })} className="input">
                   <option value="">Uncategorized</option>
                   {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
+  <label className="label">Type</label>
+
+  <select
+    value={form.types}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        types: e.target.value,
+      })
+    }
+    className="input"
+  >
+    <option value="">Select Type</option>
+
+    {filteredTypes.map((t) => (
+      <option key={t._id} value={t._id}>
+        {t.name}
+      </option>
+    ))}
+  </select>
+</div>
+              <div>
                 <label className="label">Stock</label>
                 <input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="input" />
               </div>
             </div>
-            <div>
-              <label className="label">Image URL</label>
-              <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} className="input" placeholder="https://images.pexels.com/..." />
-              {form.imageUrl && <img src={form.imageUrl} alt="preview" className="mt-2 w-20 h-20 rounded-lg object-cover border border-stone-200" />}
-            </div>
+<div>
+  <label className="label">Product Image</label>
+
+  <label className="border-2 border-dashed border-stone-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-rose-500 transition">
+
+    {preview ? (
+
+      <img
+        src={preview}
+        className="w-36 h-36 object-cover rounded-lg"
+      />
+
+    ) : (
+
+      <>
+        <ImageIcon className="w-10 h-10 text-stone-400 mb-2" />
+
+        <p className="text-sm text-stone-500">
+          Click to upload product image
+        </p>
+      </>
+
+    )}
+
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(e) => {
+
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setSelectedImage(file);
+
+        setPreview(URL.createObjectURL(file));
+
+      }}
+    />
+  </label>
+
+  {preview && (
+
+    <button
+      type="button"
+      onClick={() => {
+
+        setSelectedImage(null);
+
+        setPreview("");
+            setForm({
+        ...form,
+        imageUrl: "",
+    });
+
+      }}
+      className="mt-3 text-sm text-red-600"
+    >
+      Remove Image
+    </button>
+
+  )}
+
+</div>
             <div className="grid grid-cols-2 gap-4">
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg border border-stone-200 hover:bg-stone-50">
                 <input type="checkbox" checked={form.isAvailable} onChange={(e) => setForm({ ...form, isAvailable: e.target.checked })} className="w-4 h-4 accent-rose-600" />
