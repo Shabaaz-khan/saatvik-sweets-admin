@@ -1,3 +1,14 @@
+export type Category = {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 export type Types = {
   _id: string;
   name: string;
@@ -62,6 +73,11 @@ export type Order = {
   city: string;
   pincode: string;
   items: OrderItem[];
+  couponCode?: string;
+couponName?: string;
+discountType?: string;
+discountValue?: number;
+discountAmount?: number;
   subtotal: number;
   shippingFee: number;
   total: number;
@@ -80,3 +96,52 @@ export type CartItem = {
   product: Product;
   quantity: number;
 };
+export interface Coupon {
+  _id: string;
+
+  code: string;
+
+  name: string;
+
+  description: string;
+
+  discountType: "percentage" | "fixed";
+
+  discountValue: number;
+
+  minimumOrderValue: number;
+
+  maximumDiscount: number;
+
+  usageLimit: number;
+
+  usedCount: number;
+
+  startDate: string;
+
+  endDate: string;
+
+  isActive: boolean;
+}
+export interface CorporateFeature {
+  icon: string;
+  title: string;
+}
+
+export interface CorporatePage {
+  heroImage: string;
+
+  eyebrow: string;
+
+  title: string;
+
+  subtitle: string;
+
+  features: CorporateFeature[];
+
+  formLabel: string;
+
+  formTitle: string;
+
+  formDescription: string;
+}

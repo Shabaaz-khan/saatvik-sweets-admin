@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { api } from '../lib/api';
+import {
+  getOrders,
+  updateOrder,
+} from "../api/api";
 import { useToast } from '../lib/toast';
 import { formatINR, formatDate } from '../lib/format';
 import type { Order, OrderStatus } from '../lib/types';
 import { ShoppingBag, Search, Loader2, X, Mail, Phone, MapPin, Package, CreditCard, ChevronRight } from 'lucide-react';
-
+import { API_URL } from "../lib/config";
 const STATUSES: OrderStatus[] = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 const statusStyle: Record<OrderStatus, string> = {
@@ -28,8 +31,9 @@ export default function OrdersPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await api.get<Order[]>('/orders');
-      setRows(data);
+const data = await getOrders();
+
+setRows(data);
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
     }
@@ -42,7 +46,9 @@ export default function OrdersPage() {
     if (!selected) return;
     setUpdating(true);
     try {
-      await api.put(`/orders/${selected._id}`, { status });
+await updateOrder(selected._id, {
+  status,
+});
       toast({ message: `Order marked as ${status}`, type: 'success' });
       setSelected({ ...selected, status });
       load();
@@ -126,8 +132,8 @@ export default function OrdersPage() {
 
       {selected && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={() => setSelected(null)} />
-          <div className="relative w-full max-w-md bg-white shadow-2xl h-full overflow-y-auto animate-slide-in">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity" onClick={() => setSelected(null)} />
+          <div className="relative h-full w-full max-w-xl bg-white shadow-2xl overflow-y-auto bg-white shadow-2xl h-full overflow-y-auto animate-slide-in">
             <div className="sticky top-0 bg-white border-b border-stone-100 px-6 py-4 flex items-center justify-between">
               <div>
                 <h2 className="font-display text-xl font-semibold text-stone-900">{selected.orderNumber}</h2>
@@ -161,8 +167,9 @@ export default function OrdersPage() {
                   {selected.items.map((it) => (
                     <div key={it._id} className="flex items-center gap-3">
                       {it.productImage ? (
-                        <img src={it.productImage} alt={it.productName} className="w-12 h-12 rounded-lg object-cover" />
+                <img src={it.productImage} alt={it.productName} className="w-12 h-12 rounded-lg object-cover" />
                       ) : (
+
                         <div className="w-12 h-12 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400"><Package className="w-4 h-4" /></div>
                       )}
                       <div className="flex-1 min-w-0">
@@ -174,12 +181,47 @@ export default function OrdersPage() {
                   ))}
                 </div>
               </div>
+<div className="border-t border-stone-100 pt-4 space-y-3 text-sm">
 
-              <div className="border-t border-stone-100 pt-4 space-y-2 text-sm">
-                <div className="flex justify-between text-stone-500"><span>Subtotal</span><span>{formatINR(Number(selected.subtotal))}</span></div>
-                <div className="flex justify-between text-stone-500"><span>Shipping</span><span>{formatINR(Number(selected.shippingFee))}</span></div>
-                <div className="flex justify-between text-stone-900 font-semibold text-base pt-1"><span>Total</span><span>{formatINR(Number(selected.total))}</span></div>
-              </div>
+  <div className="flex justify-between text-stone-500">
+    <span>Subtotal</span>
+
+    <span>
+      {formatINR(Number(selected.subtotal))}
+    </span>
+  </div>
+
+  <div className="flex justify-between text-stone-500">
+    <span>Shipping</span>
+
+    <span>
+      {formatINR(Number(selected.shippingFee))}
+    </span>
+  </div>
+
+  {Number(selected.discountAmount) > 0 && (
+    <div className="flex justify-between text-emerald-600 font-medium">
+
+      <span>Coupon Discount</span>
+
+      <span>
+        -{formatINR(Number(selected.discountAmount))}
+      </span>
+
+    </div>
+  )}
+
+  <div className="border-t pt-3 flex justify-between text-base font-semibold">
+
+    <span>Total Paid</span>
+
+    <span>
+      {formatINR(Number(selected.total))}
+    </span>
+
+  </div>
+
+</div>
 
               {selected.razorpayPaymentId && (
                 <div className="rounded-lg bg-stone-50 border border-stone-100 p-3 text-xs text-stone-500 space-y-1">

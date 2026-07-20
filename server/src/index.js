@@ -8,8 +8,17 @@ import categoryRoutes from './routes/categories.js';
 import typesRoutes from './routes/types.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
+import couponRoutes from './routes/coupon.js';
 import razorpayRoutes from './routes/razorpay.js';
 import uploadRoutes from './routes/upload.js';
+import corporateRoutes from './routes/corporate.js';
+import settingsRoutes from "./routes/settings.js";
+import corporatePageRoutes from "./routes/corporatePage.js";
+import menuPageRoutes from "./routes/menuPage.js";
+import aboutPageRoutes from "./routes/aboutPage.js";
+import homePageRoutes from "./routes/homePage.js";
+import legalRoutes from "./routes/legal.js";
+import customerAuthRoutes from "./routes/customerAuth.js";
 const app = express();
 
 app.use(cors({
@@ -25,8 +34,20 @@ app.use('/api/categories', categoryRoutes);
 app.use("/api/types", typesRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/coupons', couponRoutes);
 app.use('/api/razorpay', razorpayRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use("/api/corporate", corporateRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use(
+  "/api/corporate-page",
+  corporatePageRoutes
+);
+app.use("/api/menu-page", menuPageRoutes);
+app.use("/api/about-page", aboutPageRoutes);
+app.use("/api/home-page", homePageRoutes);
+app.use("/api/legal", legalRoutes);
+app.use("/api/customer", customerAuthRoutes);
 // Central error handler
 app.use((err, _req, res, _next) => {
   console.error(err);

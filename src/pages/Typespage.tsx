@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { api } from '../lib/api';
+import {
+  getTypes,
+  createType,
+  updateType,
+  deleteType,
+  getCategories,
+} from "../api/api";
 import { useToast } from '../lib/toast';
 import type { Types } from "../lib/types";
 import Modal from '../lib/modal';
@@ -20,13 +26,17 @@ export default function TypesPage() {
 const [categories, setCategories] = useState([]);
 
 useEffect(() => {
-  api.get("/categories").then(setCategories);
+  (async () => {
+    const data = await getCategories();
+    setCategories(data);
+  })();
 }, []);
   const load = async () => {
     setLoading(true);
     try {
-      const data = await api.get<Category[]>('/types');
-      setRows(data);
+const data = await getTypes();
+
+setRows(data);
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
     }
@@ -66,9 +76,9 @@ const openEdit = (c: Types) => {
         isActive: form.isActive,
       };
       if (editing) {
-        await api.put(`/types/${editing._id}`, payload);
+await updateType(editing._id, payload);
       } else {
-        await api.post('/types', payload);
+await createType(payload);
       }
       toast({ message: editing ? 'Type updated' : 'Type created', type: 'success' });
       setShowModal(false);
@@ -82,7 +92,7 @@ const openEdit = (c: Types) => {
   const remove = async (c: Types) => {
     if (!confirm(`Delete type "${c.name}"?`)) return;
     try {
-      await api.del(`/types/${c._id}`);
+await deleteType(c._id);
       toast({ message: 'Type deleted', type: 'success' });
       load();
     } catch (err: any) {

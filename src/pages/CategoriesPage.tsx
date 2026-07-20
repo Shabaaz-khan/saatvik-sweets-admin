@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import axios from "axios";
-import { api } from '../lib/api';
+import {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "../api/api";
 import { API_URL } from '../lib/config';
 import { useToast } from '../lib/toast';
 import type { Category } from '../lib/types';
@@ -38,8 +43,9 @@ const [preview,setPreview]=useState("");
   const load = async () => {
     setLoading(true);
     try {
-      const data = await api.get<Category[]>('/categories');
-      setRows(data);
+const data = await getCategories();
+
+setRows(data);
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
     }
@@ -55,11 +61,7 @@ setPreview(""); };
   const openEdit = (c: Category) => {
     setEditing(c);
     setForm({ name: c.name, description: c.description, imageUrl: c.imageUrl, sortOrder: c.sortOrder, isActive: c.isActive });
-    setPreview(
-    c.imageUrl
-        ? `${API_URL}${c.imageUrl}`
-        : ""
-);
+setPreview(c.imageUrl || "");
     setShowModal(true);
   };
 
@@ -95,7 +97,7 @@ const payload = {
   isActive: form.isActive,
 };
       if (editing) {
-        await api.put(`/categories/${editing._id}`, payload);
+       await updateCategory(editing._id, payload);
         if (
   editing &&
   oldImage &&
@@ -108,7 +110,7 @@ const payload = {
   });
 }
       } else {
-        await api.post('/categories', payload);
+        await createCategory(payload);
       }
       toast({ message: editing ? 'Category updated' : 'Category created', type: 'success' });
       setShowModal(false);
@@ -125,7 +127,7 @@ setForm(empty);
   const remove = async (c: Category) => {
     if (!confirm(`Delete category "${c.name}"?`)) return;
     try {
-      await api.del(`/categories/${c._id}`);
+      await deleteCategory(c._id);
       toast({ message: 'Category deleted', type: 'success' });
       load();
     } catch (err: any) {
@@ -178,8 +180,10 @@ setForm(empty);
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         {c.imageUrl ? (
-                          <img src={`${API_URL}${c.imageUrl}`}alt={c.name} className="w-10 h-10 rounded-lg object-cover" />
-                        ) : (
+<img
+  src={c.imageUrl}
+  alt={c.name}
+  className="w-10 h-10 rounded-lg object-cover" />                        ) : (
                           <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400"><Tags className="w-4 h-4" /></div>
                         )}
                         <div>

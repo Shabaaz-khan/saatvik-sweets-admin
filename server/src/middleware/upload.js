@@ -1,6 +1,6 @@
 import multer from "multer";
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 
 // Allowed image types
 const allowedMimeTypes = [
@@ -11,30 +11,7 @@ const allowedMimeTypes = [
 ];
 
 // Storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const folder = req.body.folder || "others";
-
-    const uploadPath = path.join("uploads", folder);
-
-    // Create folder automatically if it doesn't exist
-    fs.mkdirSync(uploadPath, { recursive: true });
-
-    cb(null, uploadPath);
-  },
-
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-
-    const fileName =
-      Date.now() +
-      "-" +
-      Math.round(Math.random() * 1000000) +
-      ext;
-
-    cb(null, fileName);
-  },
-});
+const storage = multer.memoryStorage();
 
 // Validate image
 const fileFilter = (req, file, cb) => {

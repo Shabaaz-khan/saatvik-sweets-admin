@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import crypto from 'node:crypto';
 import Order from '../models/Order.js';
-
+import Coupon from "../models/Coupon.js";
+import { optionalCustomerAuth } from "../middleware/optionalCustomerAuth.js";
 const router = Router();
 
 const KEY_ID = process.env.RAZORPAY_KEY_ID;
@@ -30,18 +31,57 @@ function verifySignature(orderId, paymentId, signature) {
 }
 
 // Create a Razorpay order + persist a pending order in MongoDB
-router.post('/create-order', async (req, res, next) => {
+router.post('/create-order',optionalCustomerAuth, async (req, res, next) => {
   try {
     if (!KEY_ID || !KEY_SECRET) return res.status(500).json({ error: 'Razorpay keys not configured on the server.' });
 
-    const { items, customer, shippingFee = 0 } = req.body;
+    const { items, customer, shippingFee = 0,  couponCode, couponName, discountType, discountValue, discountAmount = 0, grandTotal, } = req.body;
     if (!items?.length) return res.status(400).json({ error: 'Cart is empty.' });
     if (!customer?.name || !customer?.email || !customer?.phone || !customer?.address) {
       return res.status(400).json({ error: 'Missing customer details.' });
     }
 
-    const subtotal = items.reduce((s, i) => s + Number(i.price) * Number(i.quantity), 0);
-    const total = subtotal + Number(shippingFee);
+const subtotal = items.reduce(
+  (s, i) => s + Number(i.price) * Number(i.quantity),
+  0
+);
+
+let discount = 0;
+
+if (couponCode) {
+
+  const coupon = await Coupon.findOne({
+    code: couponCode.toUpperCase(),
+    isActive: true,
+  });
+
+  if (coupon) {
+
+    if (coupon.discountType === "percentage") {
+
+      discount =
+        subtotal * coupon.discountValue / 100;
+
+      if (
+        coupon.maximumDiscount &&
+        discount > coupon.maximumDiscount
+      ) {
+        discount = coupon.maximumDiscount;
+      }
+
+    } else {
+
+      discount = coupon.discountValue;
+
+    }
+
+  }
+
+}
+
+const total =
+  Number(grandTotal) || subtotal + Number(shippingFee);
+    // const total = subtotal + Number(shippingFee);
     const amountPaise = Math.round(total * 100);
 
     // Create Razorpay order
@@ -61,6 +101,7 @@ router.post('/create-order', async (req, res, next) => {
     const orderNumber = `SW-${Date.now().toString(36).toUpperCase()}`;
     const order = await Order.create({
       orderNumber,
+      customer: req.user?._id || null,
       customerName: customer.name,
       customerEmail: customer.email,
       customerPhone: customer.phone,
@@ -75,9 +116,16 @@ router.post('/create-order', async (req, res, next) => {
         quantity: Number(i.quantity),
         lineTotal: Number(i.price) * Number(i.quantity),
       })),
-      subtotal,
-      shippingFee: Number(shippingFee),
-      total,
+   subtotal,
+discount,
+shippingFee: Number(shippingFee),
+couponCode: couponCode || "",
+couponName: couponName || "",
+discountType: discountType || "",
+discountValue: Number(discountValue) || 0,
+discountAmount: Number(discountAmount) || 0,
+total,
+couponCode,
       status: 'pending',
       paymentStatus: 'unpaid',
       paymentMethod: 'razorpay',

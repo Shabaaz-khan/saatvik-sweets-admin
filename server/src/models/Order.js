@@ -15,6 +15,11 @@ const orderItemSchema = new mongoose.Schema(
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, required: true, unique: true },
+      customer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Customer",
+    default: null,
+  },
     customerName: { type: String, required: true, trim: true },
     customerEmail: { type: String, required: true, trim: true, lowercase: true },
     customerPhone: { type: String, required: true, trim: true },
@@ -22,6 +27,30 @@ const orderSchema = new mongoose.Schema(
     city: { type: String, default: '' },
     pincode: { type: String, default: '' },
     items: [orderItemSchema],
+    couponCode: {
+  type: String,
+  default: "",
+},
+
+couponName: {
+  type: String,
+  default: "",
+},
+
+discountType: {
+  type: String,
+  default: "",
+},
+
+discountValue: {
+  type: Number,
+  default: 0,
+},
+
+discountAmount: {
+  type: Number,
+  default: 0,
+},
     subtotal: { type: Number, required: true, min: 0 },
     shippingFee: { type: Number, default: 0, min: 0 },
     total: { type: Number, required: true, min: 0 },

@@ -1,25 +1,41 @@
-import { useEffect, useState } from 'react';
-import { api } from '../lib/api';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getProducts,
+  getCategories,
+  getOrders,
+} from "../api/api";
 import { formatINR, formatDate } from '../lib/format';
 import { Package, Tags, ShoppingBag, IndianRupee, Clock, ArrowUpRight } from 'lucide-react';
-import type { Order, Product, Category } from '../lib/types';
+import type { Order,  Product, Category,} from '../lib/types';
 
-export default function DashboardPage({ onNavigate }: { onNavigate: (p: 'products' | 'categories' | 'orders') => void }) {
-  const [stats, setStats] = useState({ products: 0, categories: 0, orders: 0, revenue: 0, pending: 0 });
+export default function DashboardPage() {
+    const [stats, setStats] = useState({ products: 0, categories: 0, orders: 0, revenue: 0, pending: 0 });
   const [recent, setRecent] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-
+const navigate = useNavigate();
   useEffect(() => {
     (async () => {
       try {
-        const [products, categories, orders] = await Promise.all([
-          api.get<Product[]>('/products'),
-          api.get<Category[]>('/categories'),
-          api.get<Order[]>('/orders'),
-        ]);
-        const paid = orders.filter((o) => o.paymentStatus === 'paid');
-        const revenue = paid.reduce((s, o) => s + Number(o.total), 0);
-        const pending = orders.filter((o) => o.status === 'pending' || o.status === 'processing').length;
+const [products, categories, orders] = await Promise.all([
+  getProducts(),
+  getCategories(),
+  getOrders(),
+]);
+const paid = orders.filter(
+  (o: Order) => o.paymentStatus === "paid"
+);
+
+const revenue = paid.reduce(
+  (s: number, o: Order) => s + Number(o.total),
+  0
+);
+
+const pending = orders.filter(
+  (o: Order) =>
+    o.status === "pending" ||
+    o.status === "processing"
+).length;
         setStats({
           products: products.length,
           categories: categories.length,
@@ -76,7 +92,7 @@ export default function DashboardPage({ onNavigate }: { onNavigate: (p: 'product
         <div className="card p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-display text-xl font-semibold text-stone-900">Recent Orders</h2>
-            <button onClick={() => onNavigate('orders')} className="text-sm font-medium text-rose-600 hover:text-rose-700 flex items-center gap-1">
+            <button onClick={() => navigate("/orders")}className="text-sm font-medium text-rose-600 hover:text-rose-700 flex items-center gap-1">
               View all <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -112,14 +128,14 @@ export default function DashboardPage({ onNavigate }: { onNavigate: (p: 'product
         <div className="card p-6">
           <h2 className="font-display text-xl font-semibold text-stone-900 mb-5">Quick Actions</h2>
           <div className="space-y-3">
-            <button onClick={() => onNavigate('products')} className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-stone-200 hover:border-rose-200 hover:bg-rose-50/50 transition text-left">
+            <button onClick={() => navigate("/products")} className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-stone-200 hover:border-rose-200 hover:bg-rose-50/50 transition text-left">
               <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><Package className="w-4 h-4" /></div>
               <div>
                 <div className="text-sm font-medium text-stone-800">Add a product</div>
                 <div className="text-xs text-stone-400">Manage your sweet catalog</div>
               </div>
             </button>
-            <button onClick={() => onNavigate('categories')} className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-stone-200 hover:border-rose-200 hover:bg-rose-50/50 transition text-left">
+            <button onClick={() => navigate("/categories")} className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-stone-200 hover:border-rose-200 hover:bg-rose-50/50 transition text-left">
               <div className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center"><Tags className="w-4 h-4" /></div>
               <div>
                 <div className="text-sm font-medium text-stone-800">Add a category</div>

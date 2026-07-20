@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { useToast } from '../lib/toast';
-import { Candy, Loader2, Lock, Mail, Store } from 'lucide-react';
-
-export default function LoginPage({ onGoStore }: { onGoStore: () => void }) {
+import { Candy, Loader2, Lock, Mail } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+export default function LoginPage() {
   const { signIn, signUp } = useAuth();
   const toast = useToast();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-
+const navigate = useNavigate();
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -23,6 +23,7 @@ export default function LoginPage({ onGoStore }: { onGoStore: () => void }) {
       toast({ message: 'Account created. You are signed in.', type: 'success' });
     } else {
       toast({ message: 'Welcome back!', type: 'success' });
+      navigate("/dashboard");
     }
   };
 
@@ -116,11 +117,11 @@ export default function LoginPage({ onGoStore }: { onGoStore: () => void }) {
             </button>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-stone-200 text-center">
+          {/* <div className="mt-8 pt-6 border-t border-stone-200 text-center">
             <button onClick={onGoStore} className="btn-ghost text-stone-500">
               <Store className="w-4 h-4" /> View storefront
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

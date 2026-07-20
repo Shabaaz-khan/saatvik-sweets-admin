@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import axios from "axios";
-import { api } from '../lib/api';
+// import { api } from '../lib/api';
+import {
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getCategories,
+  getTypes,
+} from "../api/api";
 import { API_URL } from '../lib/config';
 import { useToast } from '../lib/toast';
 import { formatINR } from '../lib/format';
@@ -62,14 +70,15 @@ const [preview, setPreview] = useState("");
   const load = async () => {
     setLoading(true);
     try {
-      const [products, cats, types] = await Promise.all([
-        api.get<Product[]>('/products'),
-        api.get<Category[]>('/categories'),
-          api.get<Types[]>("/types"),
-      ]);
-      setRows(products);
-      setCategories(cats);
-      setTypes(types);
+const [products, cats, types] = await Promise.all([
+  getProducts(),
+  getCategories(),
+  getTypes(),
+]);
+console.log("Products API Response:", products);
+setRows(products);
+setCategories(cats);
+setTypes(types);
     } catch (err: any) {
       toast({ message: err.message, type: 'error' });
     }
@@ -112,11 +121,7 @@ setForm({
         }))
       : [{ weight: "", price: "" }],
 });
-setPreview(
-  p.imageUrl
-    ? `${API_URL}${p.imageUrl}`
-    : ""
-);
+setPreview(p.imageUrl || "");
 
 setSelectedImage(null);
     setShowModal(true);
@@ -167,7 +172,7 @@ imageUrl,
 };
       if (editing) {
         
-        await api.put(`/products/${editing._id}`, payload);
+await updateProduct(editing._id, payload);
          if (
         oldImage &&
         oldImage !== imageUrl
@@ -182,7 +187,7 @@ imageUrl,
         );
     }
       } else {
-        await api.post('/products', payload);
+await createProduct(payload);
       }
       toast({ message: editing ? 'Product updated' : 'Product created', type: 'success' });
       setShowModal(false);
@@ -209,7 +214,7 @@ if (p.imageUrl) {
   });
 }
 
-await api.del(`/products/${p._id}`);     
+await deleteProduct(p._id);
  toast({ message: 'Product deleted', type: 'success' });
       load();
     } catch (err: any) {
@@ -277,10 +282,10 @@ const filteredTypes = types.filter(
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         {p.imageUrl ? (
-                          <img
-  src={`${API_URL}${p.imageUrl}`}
+<img
+  src={p.imageUrl}
   alt={p.name}
-  className="w-11 h-11 rounded-lg object-cover"
+  className="w-10 h-10 rounded-lg object-cover"
 />
                         ) : (
                           <div className="w-11 h-11 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400"><Package className="w-4 h-4" /></div>

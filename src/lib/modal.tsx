@@ -5,12 +5,15 @@ import { X } from "lucide-react";
 export default function Modal({
   title,
   children,
+  footer,
   onClose,
 }: {
   title: string;
   children: ReactNode;
+  footer?: ReactNode;
   onClose: () => void;
-}) {
+})
+{
   // Prevent background scrolling
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -47,6 +50,11 @@ export default function Modal({
         <div className="overflow-y-auto p-6">
           {children}
         </div>
+        {footer && (
+  <div className="sticky bottom-0 border-t bg-white px-6 py-4 flex justify-end gap-3">
+    {footer}
+  </div>
+)}
       </div>
     </div>,
     document.body

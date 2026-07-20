@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import Order from '../models/Order.js';
 import { authMiddleware } from '../middleware/auth.js';
-
+import { customerAuth } from '../middleware/customerAuth.js';
 const router = Router();
 
 // Admin: list all orders
@@ -18,7 +18,21 @@ router.get('/', authMiddleware, async (req, res, next) => {
     res.json(orders);
   } catch (err) { next(err); }
 });
+// Customer: My Orders
+router.get("/my-orders", customerAuth, async (req, res, next) => {
+  try {
+    const orders = await Order.find({
+      customer: req.user._id,
+    }).sort({ createdAt: -1 });
 
+    res.json({
+      success: true,
+      orders,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 // Admin: single order
 router.get('/:id', authMiddleware, async (req, res, next) => {
   try {

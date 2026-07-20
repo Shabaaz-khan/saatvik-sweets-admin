@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { api, setToken, clearToken } from './api';
-
+import { setToken, clearToken } from "./api";
+import { login, register, getMe } from "../api/api";
 type AdminUser = { id: string; email: string; name: string };
 
 type AuthContextValue = {
@@ -25,8 +25,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
-        const res = await api.get<{ user: AdminUser }>('/auth/me');
-        setUser(res.user);
+const res = await getMe();
+
+setUser(res.user);
       } catch {
         clearToken();
       }
@@ -36,9 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
-      const res = await api.post<{ token: string; user: AdminUser }>('/auth/register', { email, password });
-      setToken(res.token);
-      setUser(res.user);
+const res = await register({
+  email,
+  password,
+});
+
+setToken(res.token);
+setUser(res.user);
       return { error: null };
     } catch (err: any) {
       return { error: err.message };
@@ -47,9 +52,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const res = await api.post<{ token: string; user: AdminUser }>('/auth/login', { email, password });
-      setToken(res.token);
-      setUser(res.user);
+const res = await login({
+  email,
+  password,
+});
+
+setToken(res.token);
+setUser(res.user);
       return { error: null };
     } catch (err: any) {
       return { error: err.message };

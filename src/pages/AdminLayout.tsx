@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from "react";
+import { NavLink, Outlet, useNavigate} from "react-router-dom";
 import { useAuth } from '../lib/auth';
 import {
   LayoutDashboard,
@@ -7,37 +8,75 @@ import {
   ShoppingBag,
   LogOut,
   Candy,
-  Store,
   Menu,
   X,
+   TicketPercent,
+   Building2,
+   Settings ,
+     Globe,
+  Home,
+  Info,
+  ShieldCheck,
+  LayoutList,
 } from 'lucide-react';
 
-export type AdminPage = 'dashboard' | 'products' | 'categories'| 'types' | 'orders';
 
-export default function AdminLayout({
-  page,
-  onNavigate,
-  onGoStore,
-  children,
-}: {
-  page: AdminPage;
-  onNavigate: (p: AdminPage) => void;
-  onGoStore: () => void;
-  children: ReactNode;
-}) {
+// export type AdminPage = 'dashboard' | 'products' | 'categories'| 'types' | 'orders';
+
+export default function AdminLayout() {
   const { user, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const nav: { id: AdminPage; label: string; icon: typeof LayoutDashboard }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-     { id: 'categories', label: 'Categories', icon: Tags },
-     { id: 'types', label: 'Types', icon: Tags },
-    { id: 'products', label: 'Products', icon: Package },
-    { id: 'orders', label: 'Orders', icon: ShoppingBag },
-  ];
+ const nav = [
+  {
+    path: "/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    path: "/categories",
+    label: "Categories",
+    icon: Tags,
+  },
+  {
+    path: "/types",
+    label: "Types",
+    icon: Tags,
+  },
+  {
+    path: "/products",
+    label: "Products",
+    icon: Package,
+  },
+  {
+    path: "/orders",
+    label: "Orders",
+    icon: ShoppingBag,
+  },
+  {
+  path: "/coupons",
+  label: "Coupons",
+  icon: TicketPercent,
+},
+{
+  path: "/corporate",
+  label: "Corporate",
+  icon: Building2,
+},
+// {
+//   path: "/settings",
+//   label: "Settings",
+//   icon: Settings,
+// },
+];
+const navigate = useNavigate();
 
+const logout = () => {
+    signOut();
+    navigate("/login", { replace: true });
+};
   const SidebarContent = (
-    <div className="flex flex-col h-full">
+   <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center gap-2.5 px-6 h-16 border-b border-stone-200/70 shrink-0">
         <div className="w-9 h-9 rounded-lg bg-rose-600 flex items-center justify-center text-white">
           <Candy className="w-5 h-5" />
@@ -47,36 +86,131 @@ export default function AdminLayout({
           <div className="text-[11px] text-stone-400 mt-0.5">Admin Console</div>
         </div>
       </div>
+<div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+{nav.map((n) => {
+  const Icon = n.icon;
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {nav.map((n) => {
-          const Icon = n.icon;
-          const active = page === n.id;
-          return (
-            <button
-              key={n.id}
-              onClick={() => {
-                onNavigate(n.id);
-                setMobileOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                active
-                  ? 'bg-rose-50 text-rose-700 border border-rose-100'
-                  : 'text-stone-600 hover:bg-stone-100 border border-transparent'
-              }`}
-            >
-              <Icon className={`w-[18px] h-[18px] ${active ? 'text-rose-600' : 'text-stone-400'}`} />
-              {n.label}
-            </button>
-          );
-        })}
-      </nav>
+  return (
+    <NavLink
+      key={n.path}
+      to={n.path}
+      onClick={() => setMobileOpen(false)}
+      className={({ isActive }) =>
+        `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+          isActive
+            ? "bg-rose-50 text-rose-700 border border-rose-100"
+            : "text-stone-600 hover:bg-stone-100 border border-transparent"
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <Icon
+            className={`w-[18px] h-[18px] ${
+              isActive
+                ? "text-rose-600"
+                : "text-stone-400"
+            }`}
+          />
 
+          {n.label}
+        </>
+      )}
+    </NavLink>
+  );
+})}
+<div className="mt-6 px-3">
+
+  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-stone-400">
+    Website CMS
+  </div>
+
+  <NavLink
+    to="/website/home"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <Home className="w-[18px] h-[18px]" />
+    Home CMS
+  </NavLink>
+  <NavLink
+    to="/website/menu"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <LayoutList className="w-[18px] h-[18px]" />
+    Menu CMS
+  </NavLink>
+  <NavLink
+    to="/website/about"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <Info className="w-[18px] h-[18px]" />
+    About CMS
+  </NavLink>
+
+  <NavLink
+    to="/website/corporate"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <Building2 className="w-[18px] h-[18px]" />
+    Corporate CMS
+  </NavLink>
+  <NavLink
+    to="/website/legal"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <ShieldCheck className="w-[18px] h-[18px]" />
+    Leagal CMS
+  </NavLink>
+</div>
+<NavLink
+  to="/settings"
+  className={({ isActive }) =>
+    `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+      isActive
+        ? "bg-rose-50 text-rose-700 border border-rose-100"
+        : "text-stone-600 hover:bg-stone-100"
+    }`
+  }
+>
+  <Settings className="w-[18px] h-[18px]" />
+  Settings
+</NavLink>
+</div>
       <div className="px-3 py-4 border-t border-stone-200/70 space-y-1">
-        <button onClick={onGoStore} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition">
+        {/* <button onClick={onGoStore} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition">
           <Store className="w-[18px] h-[18px] text-stone-400" /> View Storefront
-        </button>
-        <button onClick={signOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition">
+        </button> */}
+        <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition">
           <LogOut className="w-[18px] h-[18px] text-stone-400" /> Sign out
         </button>
         <div className="px-3 pt-3 text-xs text-stone-400 truncate">
@@ -119,7 +253,7 @@ export default function AdminLayout({
             <span className="font-display font-semibold text-stone-900">Saatvik sweets & savouries</span>
           </div>
         </header>
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto"><Outlet /></main>
       </div>
     </div>
   );

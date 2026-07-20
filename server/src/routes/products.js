@@ -38,27 +38,43 @@ router.get('/:id', async (req, res, next) => {
 router.post('/', authMiddleware, async (req, res, next) => {
   try {
     // Validate category if provided
-    if (req.body.category) {
-      const cat = await Category.findById(req.body.category);
-      if (!cat) return res.status(400).json({ error: 'Category not found.' });
-    }
-    if (req.body.types) {
-  const type = await Types.findById(req.body.types);
-
-  if (!type) {
-    return res.status(400).json({
-      error: "Type not found.",
-    });
+// Check category
+if (req.body.category) {
+  const cat = await Category.findById(req.body.category);
+  if (!cat) {
+    return res.status(400).json({ error: "Category not found." });
   }
 }
-    const product = await Product.create(req.body);
-    await product.populate("category")
-.populate("types");
-    res.status(201).json(product);
-  } catch (err) {
-    if (err.code === 11000) return res.status(409).json({ error: 'A product with this slug already exists.' });
-    next(err);
+
+// Check type
+if (req.body.types) {
+  const type = await Types.findById(req.body.types);
+  if (!type) {
+    return res.status(400).json({ error: "Type not found." });
   }
+}
+
+const product = await Product.create(req.body);
+
+const populatedProduct = await Product.findById(product._id)
+  .populate("category")
+  .populate("types");
+
+return res.status(201).json(populatedProduct);
+} catch (err) {
+  console.error("CREATE PRODUCT ERROR:", err);
+
+  if (err.code === 11000) {
+    return res.status(409).json({
+      error: "A product with this slug already exists.",
+    });
+  }
+
+  return res.status(500).json({
+    message: err.message,
+    stack: err.stack,
+  });
+}
 });
 
 // Admin: update
