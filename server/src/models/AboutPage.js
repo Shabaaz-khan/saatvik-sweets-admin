@@ -42,7 +42,10 @@ const AboutPageSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-
+videoFile: {
+  type: String,
+  default: "",
+},
     quote: {
       type: String,
       default:

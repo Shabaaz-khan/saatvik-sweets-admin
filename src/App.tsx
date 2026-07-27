@@ -22,6 +22,7 @@ import CorporateCmsPage from "./pages/CorporateCmsPage";
 import MenuCmsPage from "./pages/MenuCmsPage";
 import AboutCmsPage from "./pages/AboutCmsPage";
 import HomeCmsPage from "./pages/HomeCmsPage";
+import ContactCmsPage from "./pages/ContactCmsPage";
 import LegalPage from "./pages/LegalPage";
 // import StorePage from './pages/StorePage';
 import { Candy, Loader2 } from 'lucide-react';
@@ -116,6 +117,10 @@ return (
 <Route
   path="/website/home"
   element={<HomeCmsPage />}
+/>
+<Route
+  path="/website/contact"
+  element={<ContactCmsPage />}
 />
 <Route
   path="/website/legal"

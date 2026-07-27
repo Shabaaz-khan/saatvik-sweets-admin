@@ -157,8 +157,29 @@ await updateOrder(selected._id, {
                   <div className="flex items-center gap-2.5 text-stone-700"><Package className="w-4 h-4 text-stone-400" /> {selected.customerName}</div>
                   <div className="flex items-center gap-2.5 text-stone-700"><Mail className="w-4 h-4 text-stone-400" /> {selected.customerEmail}</div>
                   <div className="flex items-center gap-2.5 text-stone-700"><Phone className="w-4 h-4 text-stone-400" /> {selected.customerPhone}</div>
-                  <div className="flex items-start gap-2.5 text-stone-700"><MapPin className="w-4 h-4 text-stone-400 mt-0.5" /> <span>{selected.shippingAddress}{selected.city ? `, ${selected.city}` : ''}{selected.pincode ? ` — ${selected.pincode}` : ''}</span></div>
-                </div>
+<div className="flex items-start gap-2.5 text-stone-700">
+  <MapPin className="w-4 h-4 text-stone-400 mt-1 flex-shrink-0" />
+
+  <div className="space-y-1">
+    <div className="font-medium">
+      {selected.firstName} {selected.lastName}
+    </div>
+
+    <div>{selected.address1}</div>
+
+    {selected.address2 && (
+      <div>{selected.address2}</div>
+    )}
+
+    {selected.landmark && (
+      <div>Landmark: {selected.landmark}</div>
+    )}
+
+    <div>
+      {selected.city}, {selected.state} - {selected.pincode}
+    </div>
+  </div>
+</div>                </div>
               </div>
 
               <div className="space-y-3">

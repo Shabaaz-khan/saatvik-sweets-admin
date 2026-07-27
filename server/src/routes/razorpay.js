@@ -102,12 +102,23 @@ const total =
     const order = await Order.create({
       orderNumber,
       customer: req.user?._id || null,
-      customerName: customer.name,
-      customerEmail: customer.email,
-      customerPhone: customer.phone,
-      shippingAddress: customer.address,
-      city: customer.city || '',
-      pincode: customer.pincode || '',
+customerName: customer.name,
+customerEmail: customer.email,
+customerPhone: customer.phone,
+
+// New fields
+firstName: customer.firstName || "",
+lastName: customer.lastName || "",
+
+address1: customer.address1 || "",
+address2: customer.address2 || "",
+landmark: customer.landmark || "",
+state: customer.state || "",
+
+// Existing fields
+shippingAddress: customer.address,
+city: customer.city || "",
+pincode: customer.pincode || "",
       items: items.map((i) => ({
         product: i.product_id || null,
         productName: i.name,
@@ -173,17 +184,28 @@ router.post('/verify-payment', async (req, res, next) => {
 
     res.json({
       success: true,
-      order: {
-        id: order._id,
-        order_number: order.orderNumber,
-        total: order.total,
-        customer_name: order.customerName,
-        customer_email: order.customerEmail,
-        customer_phone: order.customerPhone,
-        shipping_address: order.shippingAddress,
-        city: order.city,
-        pincode: order.pincode,
-      },
+order: {
+  id: order._id,
+  order_number: order.orderNumber,
+  total: order.total,
+
+  customer_name: order.customerName,
+  customer_email: order.customerEmail,
+  customer_phone: order.customerPhone,
+
+  first_name: order.firstName,
+  last_name: order.lastName,
+
+  address1: order.address1,
+  address2: order.address2,
+  landmark: order.landmark,
+
+  shipping_address: order.shippingAddress,
+
+  city: order.city,
+  state: order.state,
+  pincode: order.pincode,
+},
       items: order.items.map((i) => ({
         product_name: i.productName,
         product_image: i.productImage,

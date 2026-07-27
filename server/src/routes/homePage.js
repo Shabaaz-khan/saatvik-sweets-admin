@@ -78,7 +78,12 @@ router.get("/", async (req, res) => {
           buttonText: "",
           buttonLink: "",
         },
-
+floatingVideo: {
+  enabled: true,
+  videoUrl: "",
+  poster: "",
+  position: "right",
+},
         signature: {
           eyebrow: "Signature Selection",
           title: "The house favourites",

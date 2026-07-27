@@ -99,7 +99,27 @@ const HomePageSchema = new mongoose.Schema(
       buttonText: String,
       buttonLink: String,
     },
+floatingVideo: {
+  enabled: {
+    type: Boolean,
+    default: true,
+  },
 
+  videoUrl: {
+    type: String,
+    default: "",
+  },
+
+  poster: {
+    type: String,
+    default: "",
+  },
+
+  position: {
+    type: String,
+    default: "right",
+  },
+},
 signature: {
   eyebrow: String,
   title: String,
@@ -126,7 +146,13 @@ signature: {
       secondaryButtonText: String,
       secondaryButtonLink: String,
     },
-
+videoTestimonials: [
+  {
+    videoUrl: String,
+    name: String,
+    designation: String,
+  },
+],
 testimonials: [
   {
     name: {
@@ -147,6 +173,7 @@ testimonials: [
     },
   },
 ],
+
   },
   {
     timestamps: true,

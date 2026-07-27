@@ -66,12 +66,23 @@ export type OrderItem = {
 export type Order = {
   _id: string;
   orderNumber: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  shippingAddress: string;
-  city: string;
-  pincode: string;
+ customerName: string;
+customerEmail: string;
+customerPhone: string;
+
+// New Address Fields
+firstName: string;
+lastName: string;
+
+address1: string;
+address2: string;
+landmark: string;
+state: string;
+
+// Existing Address Fields
+shippingAddress: string;
+city: string;
+pincode: string;
   items: OrderItem[];
   couponCode?: string;
 couponName?: string;

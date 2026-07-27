@@ -20,13 +20,25 @@ const orderSchema = new mongoose.Schema(
     ref: "Customer",
     default: null,
   },
-    customerName: { type: String, required: true, trim: true },
-    customerEmail: { type: String, required: true, trim: true, lowercase: true },
-    customerPhone: { type: String, required: true, trim: true },
-    shippingAddress: { type: String, required: true, trim: true },
-    city: { type: String, default: '' },
-    pincode: { type: String, default: '' },
-    items: [orderItemSchema],
+customerName: { type: String, required: true, trim: true },
+customerEmail: { type: String, required: true, trim: true, lowercase: true },
+customerPhone: { type: String, required: true, trim: true },
+
+// New fields for saved addresses
+firstName: { type: String, default: "" },
+lastName: { type: String, default: "" },
+
+address1: { type: String, default: "" },
+address2: { type: String, default: "" },
+landmark: { type: String, default: "" },
+state: { type: String, default: "" },
+
+// Existing fields
+shippingAddress: { type: String, required: true, trim: true },
+city: { type: String, default: "" },
+pincode: { type: String, default: "" },
+
+items: [orderItemSchema],
     couponCode: {
   type: String,
   default: "",

@@ -18,6 +18,7 @@ import {
   Info,
   ShieldCheck,
   LayoutList,
+  Contact,
 } from 'lucide-react';
 
 
@@ -177,6 +178,19 @@ const logout = () => {
   >
     <Building2 className="w-[18px] h-[18px]" />
     Corporate CMS
+  </NavLink>
+    <NavLink
+    to="/website/contact"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <Contact className="w-[18px] h-[18px]" />
+    Contact CMS
   </NavLink>
   <NavLink
     to="/website/legal"

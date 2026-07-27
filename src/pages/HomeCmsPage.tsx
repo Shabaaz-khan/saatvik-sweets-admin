@@ -23,6 +23,12 @@ export default function HomeCmsPage() {
 const [loading, setLoading] = useState(true);
 const [saving, setSaving] = useState(false);
 const [categories, setCategories] = useState<any[]>([]);
+const [floatingVideo, setFloatingVideo] = useState({
+  enabled: true,
+  videoUrl: "",
+  poster: "",
+  position: "right",
+});
 useEffect(() => {
   loadCategories();
 }, []);
@@ -108,7 +114,13 @@ const [corporate, setCorporate] = useState({
   secondaryButtonText: "",
   secondaryButtonLink: "",
 });
-
+const [videoTestimonials, setVideoTestimonials] = useState<
+  {
+    name: string;
+    designation: string;
+    videoUrl: string;
+  }[]
+>([]);
 const [testimonials, setTestimonials] = useState<
 {
   name: string;
@@ -160,7 +172,14 @@ async function load() {
         buttonLink: "",
       }
     );
-
+setFloatingVideo(
+  data.floatingVideo || {
+    enabled: true,
+    videoUrl: "",
+    poster: "",
+    position: "right",
+  }
+);
 setSignature(
   data.signature || {
     eyebrow: "",
@@ -183,7 +202,9 @@ setSignature(
         secondaryButtonLink: "",
       }
     );
-
+setVideoTestimonials(
+  data.videoTestimonials || []
+);
     setTestimonials(data.testimonials || []);
   } catch (err: any) {
     toast({
@@ -213,11 +234,11 @@ async function save(e: React.FormEvent) {
       },
 
       story,
-
+  floatingVideo,
       signature,
 
       corporate,
-
+videoTestimonials,
       testimonials,
     });
 
@@ -234,6 +255,81 @@ async function save(e: React.FormEvent) {
 
   setSaving(false);
 }
+const uploadTestimonialVideo = async (
+  e: React.ChangeEvent<HTMLInputElement>,
+  index: number
+) => {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  const formData = new FormData();
+
+  formData.append("image", file);
+  formData.append("folder", "home");
+
+  try {
+    const { data } = await axios.post(
+      `${API_URL}/api/upload`,
+      formData
+    );
+
+    const arr = [...videoTestimonials];
+
+    arr[index].videoUrl = data.imageUrl;
+
+    setVideoTestimonials(arr);
+
+    toast({
+      message: "Video uploaded",
+      type: "success",
+    });
+  } catch {
+    toast({
+      message: "Upload failed",
+      type: "error",
+    });
+  }
+};
+const uploadFloatingVideo = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  const formData = new FormData();
+
+  formData.append("image", file);
+
+  formData.append("folder", "home");
+
+
+  try {
+    const { data } = await axios.post(
+      `${API_URL}/api/upload`,
+      formData
+    );
+
+    setFloatingVideo((prev) => ({
+      ...prev,
+        videoUrl: data.imageUrl,
+    }));
+
+    toast({
+      message: "Video uploaded",
+      type: "success",
+    });
+
+  } catch {
+
+    toast({
+      message: "Upload failed",
+      type: "error",
+    });
+
+  }
+};
 const uploadImage = async (
   e: React.ChangeEvent<HTMLInputElement>,
   onSuccess: (url: string) => void,
@@ -1302,6 +1398,87 @@ return (
   </div>
 
 </div>
+<div className="card p-6">
+
+  <h2 className="text-lg font-semibold mb-6">
+    Floating Video
+  </h2>
+
+  <div className="space-y-5">
+
+    <label className="flex items-center gap-3">
+
+      <input
+        type="checkbox"
+        checked={floatingVideo.enabled}
+        onChange={(e) =>
+          setFloatingVideo({
+            ...floatingVideo,
+            enabled: e.target.checked,
+          })
+        }
+      />
+
+      Enable Floating Video
+
+    </label>
+
+    <div>
+
+      <label className="label">
+        Upload Video
+      </label>
+
+      <input
+        type="file"
+        accept="video/*"
+        onChange={uploadFloatingVideo}
+      />
+
+    </div>
+
+    {floatingVideo.videoUrl && (
+
+      <video
+        src={floatingVideo.videoUrl}
+        controls
+        className="w-56 rounded-xl mt-4"
+      />
+
+    )}
+
+    <div>
+
+      <label className="label">
+        Position
+      </label>
+
+      <select
+        className="input"
+        value={floatingVideo.position}
+        onChange={(e) =>
+          setFloatingVideo({
+            ...floatingVideo,
+            position: e.target.value,
+          })
+        }
+      >
+
+        <option value="right">
+          Right
+        </option>
+
+        <option value="left">
+          Left
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+</div>
 {/* Signature */}
 
 <div className="card p-6">
@@ -1599,6 +1776,94 @@ return (
     </div>
 
   </div>
+
+</div>
+<div className="card p-6">
+
+  <div className="flex justify-between items-center mb-6">
+
+    <h2 className="text-lg font-semibold">
+      Video Testimonials
+    </h2>
+
+    <button
+      type="button"
+      className="btn-secondary"
+      onClick={() =>
+        setVideoTestimonials([
+          ...videoTestimonials,
+          {
+            name: "",
+            designation: "",
+            videoUrl: "",
+          },
+        ])
+      }
+    >
+      <Plus className="w-4 h-4" />
+      Add Video
+    </button>
+
+  </div>
+
+  {videoTestimonials.map((item, index) => (
+    <div
+      key={index}
+      className="border rounded-xl p-5 mb-6"
+    >
+      <input
+        className="input mb-4"
+        placeholder="Customer Name"
+        value={item.name}
+        onChange={(e) => {
+          const arr = [...videoTestimonials];
+          arr[index].name = e.target.value;
+          setVideoTestimonials(arr);
+        }}
+      />
+
+      <input
+        className="input mb-4"
+        placeholder="Designation"
+        value={item.designation}
+        onChange={(e) => {
+          const arr = [...videoTestimonials];
+          arr[index].designation = e.target.value;
+          setVideoTestimonials(arr);
+        }}
+      />
+
+      <input
+        type="file"
+        accept="video/*"
+        onChange={(e) =>
+          uploadTestimonialVideo(e, index)
+        }
+      />
+
+      {item.videoUrl && (
+        <video
+          src={item.videoUrl}
+          controls
+          className="w-56 rounded-xl mt-4"
+        />
+      )}
+
+      <button
+        type="button"
+        className="btn-danger mt-5"
+        onClick={() =>
+          setVideoTestimonials(
+            videoTestimonials.filter(
+              (_, i) => i !== index
+            )
+          )
+        }
+      >
+        Remove
+      </button>
+    </div>
+  ))}
 
 </div>
 {/* Testimonials */}

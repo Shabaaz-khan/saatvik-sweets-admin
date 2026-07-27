@@ -222,3 +222,12 @@ export async function updateLegalPage(payload: any) {
   const { data } = await api.put("/legal", payload);
   return data;
 }
+export async function getContactPage() {
+  const { data } = await api.get("/contact-page");
+  return data;
+}
+
+export async function updateContactPage(payload: any) {
+  const { data } = await api.put("/contact-page", payload);
+  return data;
+}

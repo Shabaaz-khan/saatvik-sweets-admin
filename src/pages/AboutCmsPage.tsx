@@ -8,7 +8,8 @@ import {
   Loader2,
   Save,
 } from "lucide-react";
-
+import axios from "axios";
+import { API_URL } from "../lib/config";
 export default function AboutCmsPage() {
 
   const toast = useToast();
@@ -22,7 +23,7 @@ export default function AboutCmsPage() {
     title: "",
     subtitle: "",
     videoUrl: "",
-
+ videoFile: "",
     quote: "",
     story1: "",
     story2: "",
@@ -35,7 +36,71 @@ export default function AboutCmsPage() {
       body: "",
     },
   ]);
+const uploadVideo = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
 
+  if (!file) return;
+
+  const formData = new FormData();
+
+  formData.append("image", file); 
+  formData.append("folder", "about");
+
+  try {
+    const { data } = await axios.post(
+      `${API_URL}/api/upload`,
+      formData
+    );
+console.log(data);
+setForm((prev) => {
+  const updated = {
+    ...prev,
+    videoFile: data.imageUrl,
+  };
+
+  console.log(updated);
+
+  return updated;
+});
+
+    toast({
+      message: "Video uploaded",
+      type: "success",
+    });
+
+  } catch {
+    toast({
+      message: "Upload failed",
+      type: "error",
+    });
+  }
+};
+const removeVideo = async () => {
+  try {
+    await axios.delete(`${API_URL}/api/upload`, {
+      data: {
+        imageUrl: form.videoFile,
+      },
+    });
+
+    setForm((prev) => ({
+      ...prev,
+      videoFile: "",
+    }));
+
+    toast({
+      message: "Video removed",
+      type: "success",
+    });
+  } catch (err: any) {
+    toast({
+      message: err.response?.data?.message || "Failed to remove video",
+      type: "error",
+    });
+  }
+};
   useEffect(() => {
     load();
   }, []);
@@ -51,7 +116,7 @@ export default function AboutCmsPage() {
         title: data.title || "",
         subtitle: data.subtitle || "",
         videoUrl: data.videoUrl || "",
-
+ videoFile: data.videoFile || "",
         quote: data.quote || "",
         story1: data.story1 || "",
         story2: data.story2 || "",
@@ -221,8 +286,35 @@ export default function AboutCmsPage() {
                 videoUrl: e.target.value,
               })
             }
+            
           />
+<label className="label">
+  Upload MP4 Video
+</label>
 
+<input
+  type="file"
+  accept="video/mp4"
+  onChange={uploadVideo}
+/>
+
+       {form.videoFile && (
+  <>
+    <video
+      src={form.videoFile}
+      controls
+      className="mt-4 rounded-xl w-full max-w-xl"
+    />
+
+    <button
+      type="button"
+      className="btn-secondary mt-3"
+      onClick={removeVideo}
+    >
+      Remove Video
+    </button>
+  </>
+)}
         </div>
 
         <div className="card p-6">
