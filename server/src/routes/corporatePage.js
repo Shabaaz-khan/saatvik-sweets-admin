@@ -12,23 +12,48 @@ router.get("/", async (req, res) => {
     let page = await CorporatePage.findOne();
 
     if (!page) {
-      page = await CorporatePage.create({
-        features: [
-          {
-            icon: "Briefcase",
-            title: "GST invoicing",
-          },
-          {
-            icon: "Package",
-            title: "Custom branding",
-          },
-          {
-            icon: "Sparkles",
-            title: "Dedicated manager",
-          },
-        ],
-      });
-    }
+page = await CorporatePage.create({
+  features: [
+    {
+      icon: "Briefcase",
+      title: "GST invoicing",
+    },
+    {
+      icon: "Package",
+      title: "Custom branding",
+    },
+    {
+      icon: "Sparkles",
+      title: "Dedicated manager",
+    },
+  ],
+
+showcase: {
+  badge: "Luxury Collection",
+
+  title: "Corporate Gifting That Leaves A Lasting Impression",
+
+  subtitle:
+    "Premium handcrafted sweets for memorable gifting.",
+
+  buttonText: "Request Quote",
+
+  buttonLink: "/gifting",
+
+  images: [
+    {
+      image: "",
+    },
+    {
+      image: "",
+    },
+    {
+      image: "",
+    },
+  ],
+},
+});   
+ }
 
     res.json(page);
   } catch (err) {

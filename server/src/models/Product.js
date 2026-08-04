@@ -11,6 +11,11 @@ variants: [
       type: String,
       required: true,
     },
+        discount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     price: {
       type: Number,
       required: true,
@@ -18,6 +23,11 @@ variants: [
     },
   },
 ],
+badge: {
+  type: String,
+  trim: true,
+  default: ""
+},
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
     types: { type: mongoose.Schema.Types.ObjectId, ref: "Types", default: null, },
     imageUrl: { type: String, default: '' },

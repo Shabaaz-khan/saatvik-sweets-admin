@@ -134,18 +134,24 @@ signature: {
   },
 },
 
-    corporate: {
-      label: String,
-      title: String,
-      description: String,
-      image: String,
+  corporate: {
+  label: String,
+  title: String,
+  description: String,
 
-      primaryButtonText: String,
-      primaryButtonLink: String,
+  primaryButtonText: String,
+  primaryButtonLink: String,
 
-      secondaryButtonText: String,
-      secondaryButtonLink: String,
-    },
+  secondaryButtonText: String,
+  secondaryButtonLink: String,
+
+featuredProducts: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+  },
+]
+},
 videoTestimonials: [
   {
     videoUrl: String,
@@ -160,6 +166,22 @@ testimonials: [
       default: "",
     },
     designation: {
+      type: String,
+      default: "",
+    },
+      company: {
+      type: String,
+      default: "",
+    },
+      title: {
+      type: String,
+      default: "",
+    },
+      companyLogo: {
+      type: String,
+      default: "",
+    },
+      linkedin: {
       type: String,
       default: "",
     },

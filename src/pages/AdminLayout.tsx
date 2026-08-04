@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   LayoutList,
   Contact,
+  Briefcase,
 } from 'lucide-react';
 
 
@@ -63,6 +64,16 @@ export default function AdminLayout() {
   path: "/corporate",
   label: "Corporate",
   icon: Building2,
+},
+{
+  path: "/careers",
+  label: "Careers",
+  icon: Briefcase,
+},
+{
+  path: "/career-applications",
+  label: "Career Applications",
+  icon: Briefcase,
 },
 // {
 //   path: "/settings",

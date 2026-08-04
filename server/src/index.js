@@ -21,6 +21,8 @@ import legalRoutes from "./routes/legal.js";
 import customerAuthRoutes from "./routes/customerAuth.js";
 import addressRoutes from "./routes/address.js";
 import ContactPage  from "./routes/contactPage.js";
+import careerRoutes from "./routes/careers.js";
+import careerApplicationRoutes from "./routes/careerApplications.js";
 const app = express();
 
 app.use(cors({
@@ -41,10 +43,7 @@ app.use('/api/razorpay', razorpayRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use("/api/corporate", corporateRoutes);
 app.use("/api/settings", settingsRoutes);
-app.use(
-  "/api/corporate-page",
-  corporatePageRoutes
-);
+app.use( "/api/corporate-page", corporatePageRoutes );
 app.use("/api/menu-page", menuPageRoutes);
 app.use("/api/about-page", aboutPageRoutes);
 app.use("/api/home-page", homePageRoutes);
@@ -52,6 +51,8 @@ app.use("/api/contact-page", ContactPage);
 app.use("/api/legal", legalRoutes);
 app.use("/api/customer", customerAuthRoutes);
 app.use("/api/addresses", addressRoutes);
+app.use("/api/careers", careerRoutes);
+app.use( "/api/career-applications", careerApplicationRoutes );
 // Central error handler
 app.use((err, _req, res, _next) => {
   console.error(err);

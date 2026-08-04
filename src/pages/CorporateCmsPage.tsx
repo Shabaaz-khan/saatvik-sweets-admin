@@ -19,41 +19,75 @@ export default function CorporateCmsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const [form, setForm] = useState({
-    heroImage: "",
-    eyebrow: "",
+const [features, setFeatures] = useState([
+  {
+    icon: "Briefcase",
     title: "",
-    subtitle: "",
-    formLabel: "",
-    formTitle: "",
-    formDescription: "",
-  });
+  },
+]);
+const [form, setForm] = useState({
+  heroImage: "",
+  eyebrow: "",
+  title: "",
+  subtitle: "",
 
-  const [features, setFeatures] = useState([
+showcase: {
+  badge: "",
+
+  title: "",
+
+  subtitle: "",
+
+  buttonText: "",
+
+  buttonLink: "",
+
+  images: [
     {
-      icon: "Briefcase",
-      title: "",
+      image: "",
     },
-  ]);
+  ],
+},
+formLabel: "",
+  formTitle: "",
+  formDescription: "",
+});
 
-  useEffect(() => {
-    load();
-  }, []);
 
   async function load() {
     try {
       const data = await getCorporatePage();
+setForm({
+  heroImage: data.heroImage || "",
+  eyebrow: data.eyebrow || "",
+  title: data.title || "",
+  subtitle: data.subtitle || "",
 
-      setForm({
-        heroImage: data.heroImage || "",
-        eyebrow: data.eyebrow || "",
-        title: data.title || "",
-        subtitle: data.subtitle || "",
-        formLabel: data.formLabel || "",
-        formTitle: data.formTitle || "",
-        formDescription: data.formDescription || "",
-      });
+showcase: {
+  badge: data.showcase?.badge ?? "",
+
+  title: data.showcase?.title ?? "",
+
+  subtitle: data.showcase?.subtitle ?? "",
+
+  buttonText: data.showcase?.buttonText ?? "",
+
+  buttonLink: data.showcase?.buttonLink ?? "",
+
+  images:
+    data.showcase?.images?.length
+      ? data.showcase.images
+      : [
+          {
+            image: "",
+          },
+        ],
+},
+
+  formLabel: data.formLabel || "",
+  formTitle: data.formTitle || "",
+  formDescription: data.formDescription || "",
+});
 
       setFeatures(data.features || []);
     } catch (err: any) {
@@ -65,7 +99,9 @@ export default function CorporateCmsPage() {
 
     setLoading(false);
   }
-
+useEffect(() => {
+  load();
+}, []);
   async function save(e: React.FormEvent) {
     e.preventDefault();
 
@@ -124,7 +160,53 @@ formData.append("folder", "corporate");
       });
     }
   };
+const uploadShowcaseImage = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
 
+  if (!file) return;
+
+  const formData = new FormData();
+
+  formData.append("image", file);
+  formData.append("folder", "corporate");
+
+  try {
+    const { data } = await axios.post(
+      `${API_URL}/api/upload`,
+      formData
+    );
+
+const images = form.showcase.images.filter(
+  (i) => i.image
+);
+
+images.push({
+  image: data.imageUrl,
+});
+
+setForm({
+  ...form,
+  showcase: {
+    ...form.showcase,
+    images,
+  },
+});
+
+
+
+    toast({
+      message: "Showcase image uploaded",
+      type: "success",
+    });
+  } catch {
+    toast({
+      message: "Upload failed",
+      type: "error",
+    });
+  }
+};
   if (loading) {
     return (
       <div className="p-10 text-center">
@@ -296,7 +378,177 @@ formData.append("folder", "corporate");
             + Add Feature
           </button>
         </div>
+{/* Premium Showcase */}
 
+<div className="card p-6">
+  <h2 className="text-lg font-semibold mb-5">
+    Premium Showcase
+  </h2>
+
+
+  <div className="space-y-5">
+
+    <div>
+      <label className="label">
+        Badge
+      </label>
+
+      <input
+        className="input"
+        value={form.showcase.badge}
+onChange={(e) =>
+  setForm({
+    ...form,
+    showcase: {
+      ...form.showcase,
+      badge: e.target.value,
+    },
+  })
+}
+      />
+    </div>
+
+    <div>
+      <label className="label">
+        Title
+      </label>
+
+      <input
+        className="input"
+       value={form.showcase.title}
+onChange={(e) =>
+  setForm({
+    ...form,
+    showcase: {
+      ...form.showcase,
+      title: e.target.value,
+    },
+  })
+}
+      />
+    </div>
+
+    <div>
+      <label className="label">
+        Subtitle
+      </label>
+
+      <textarea
+        rows={4}
+        className="input"
+    value={form.showcase.subtitle}
+onChange={(e) =>
+  setForm({
+    ...form,
+    showcase: {
+      ...form.showcase,
+      subtitle: e.target.value,
+    },
+  })
+}
+      />
+    </div>
+
+    <div>
+      <label className="label">
+        Button Text
+      </label>
+
+      <input
+        className="input"
+        value={form.showcase.buttonText}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            showcase: {
+              ...form.showcase,
+              buttonText: e.target.value,
+            },
+          })
+        }
+      />
+    </div>
+
+    <div>
+      <label className="label">
+        Button Link
+      </label>
+
+      <input
+        className="input"
+        value={form.showcase.buttonLink}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            showcase: {
+              ...form.showcase,
+              buttonLink: e.target.value,
+            },
+          })
+        }
+      />
+    </div>
+
+    <div>
+      <label className="label">
+        Background Image
+      </label>
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={uploadShowcaseImage}
+      />
+
+<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+
+ {form.showcase.images
+  .filter((item) => item.image)
+  .map((item, index) => (
+
+    <div
+      key={index}
+      className="relative rounded-xl overflow-hidden border"
+    >
+
+      <img
+        src={item.image}
+        className="h-36 w-full object-cover"
+      />
+
+      <button
+        type="button"
+        className="absolute top-2 right-2 bg-red-600 text-white rounded px-2 py-1 text-xs"
+        onClick={() => {
+
+          const images =
+            form.showcase.images.filter((_, i) => i !== index);
+
+          setForm({
+            ...form,
+            showcase: {
+              ...form.showcase,
+              images,
+            },
+          });
+
+        }}
+      >
+        Delete
+      </button>
+
+    </div>
+
+  ))}
+
+</div>
+    </div>
+
+  </div>
+  <hr className="my-6" />
+
+
+</div>
         {/* Inquiry Form */}
 
         <div className="card p-6">

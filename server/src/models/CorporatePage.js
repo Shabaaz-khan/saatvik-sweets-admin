@@ -12,6 +12,15 @@ const featureSchema = new mongoose.Schema({
   },
 });
 
+const showcaseImageSchema = new mongoose.Schema(
+  {
+    image: {
+      type: String,
+      default: "",
+    },
+  },
+  { _id: false }
+);
 const corporatePageSchema = new mongoose.Schema(
   {
     heroImage: {
@@ -36,7 +45,37 @@ const corporatePageSchema = new mongoose.Schema(
     },
 
     features: [featureSchema],
+showcase: {
+  badge: {
+    type: String,
+    default: "",
+  },
 
+  title: {
+    type: String,
+    default: "",
+  },
+
+  subtitle: {
+    type: String,
+    default: "",
+  },
+
+  buttonText: {
+    type: String,
+    default: "",
+  },
+
+  buttonLink: {
+    type: String,
+    default: "",
+  },
+
+  images: {
+    type: [showcaseImageSchema],
+    default: [],
+  },
+},
     formLabel: {
       type: String,
       default: "Request a quote",

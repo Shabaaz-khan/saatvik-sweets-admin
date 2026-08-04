@@ -29,9 +29,10 @@ export type Product = {
   description: string;
 variants: {
   weight: string;
+  discount:number;
   price: number;
 }[];
-
+ badge?: string;
   category: Category | null;
 
   types: Types | null;

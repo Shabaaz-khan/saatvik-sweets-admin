@@ -56,7 +56,14 @@ videoFile: {
       type: String,
       default: "",
     },
-
+team: [
+  {
+    name: String,
+    designation: String,
+    image: String,
+    description: String,
+  },
+],
     paragraph2: {
       type: String,
       default: "",

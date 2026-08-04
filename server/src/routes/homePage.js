@@ -1,6 +1,6 @@
 import { Router } from "express";
 import HomePage from "../models/HomePage.js";
-
+import Product from "../models/Product.js";
 const router = Router();
 
 /*
@@ -9,7 +9,10 @@ GET
 
 router.get("/", async (req, res) => {
   try {
-    let page = await HomePage.findOne();
+let page = await HomePage.findOne().populate({
+  path: "corporate.featuredProducts",
+  select: "name slug imageUrl",
+});
 
     if (!page) {
       page = await HomePage.create({
@@ -90,18 +93,24 @@ floatingVideo: {
           subtitle: "",
         },
 
-        corporate: {
-          label: "Corporate & Bulk Orders",
-          title: "",
-          description: "",
-          image: "",
+corporate: {
+  label: "Corporate & Bulk Orders",
 
-          primaryButtonText: "",
-          primaryButtonLink: "",
+  title: "Celebrate Every Occasion",
 
-          secondaryButtonText: "",
-          secondaryButtonLink: "",
-        },
+  description:
+    "Luxury handcrafted sweets for weddings, festivals, employee appreciation and corporate gifting.",
+
+  primaryButtonText: "Explore",
+
+  primaryButtonLink: "/corporate",
+
+  secondaryButtonText: "Contact Us",
+
+  secondaryButtonLink: "/contact",
+
+featuredProducts: [],
+},
 
         testimonials: [],
       });
@@ -126,8 +135,13 @@ router.put("/", async (req, res) => {
     if (!page) {
       page = await HomePage.create(req.body);
     } else {
-      Object.assign(page, req.body);
-      await page.save();
+      page.set(req.body);
+await page.save();
+
+page = await HomePage.findById(page._id).populate({
+  path: "corporate.featuredProducts",
+  select: "name slug imageUrl",
+});
     }
 
     res.json(page);

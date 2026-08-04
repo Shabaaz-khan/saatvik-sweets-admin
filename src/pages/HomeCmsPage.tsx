@@ -7,6 +7,7 @@ import {
   getHomePage,
   updateHomePage,
     getCategories,
+      getProducts,
 } from "../api/api";
 
 import { useToast } from "../lib/toast";
@@ -23,6 +24,7 @@ export default function HomeCmsPage() {
 const [loading, setLoading] = useState(true);
 const [saving, setSaving] = useState(false);
 const [categories, setCategories] = useState<any[]>([]);
+const [products, setProducts] = useState<any[]>([]);
 const [floatingVideo, setFloatingVideo] = useState({
   enabled: true,
   videoUrl: "",
@@ -31,6 +33,7 @@ const [floatingVideo, setFloatingVideo] = useState({
 });
 useEffect(() => {
   loadCategories();
+   loadProducts();
 }, []);
 
 const loadCategories = async () => {
@@ -40,6 +43,15 @@ const loadCategories = async () => {
     console.log("Categories:", data);
 
     setCategories(data);
+  } catch (err) {
+    console.log(err);
+  }
+};
+const loadProducts = async () => {
+  try {
+    const data = await getProducts();
+
+    setProducts(data);
   } catch (err) {
     console.log(err);
   }
@@ -108,11 +120,14 @@ const [corporate, setCorporate] = useState({
   label: "",
   title: "",
   description: "",
-  image: "",
+
   primaryButtonText: "",
   primaryButtonLink: "",
+
   secondaryButtonText: "",
   secondaryButtonLink: "",
+
+  featuredProducts: [] as string[],
 });
 const [videoTestimonials, setVideoTestimonials] = useState<
   {
@@ -125,8 +140,12 @@ const [testimonials, setTestimonials] = useState<
 {
   name: string;
   designation: string;
+  company: string;
+  title: string;
   review: string;
   image: string;
+  companyLogo: string;
+  linkedin: string;
 }[]
 >([]);
 useEffect(() => {
@@ -190,18 +209,21 @@ setSignature(
   }
 );
 
-    setCorporate(
-      data.corporate || {
-        label: "",
-        title: "",
-        description: "",
-        image: "",
-        primaryButtonText: "",
-        primaryButtonLink: "",
-        secondaryButtonText: "",
-        secondaryButtonLink: "",
-      }
-    );
+setCorporate(
+  data.corporate || {
+    label: "",
+    title: "",
+    description: "",
+
+    primaryButtonText: "",
+    primaryButtonLink: "",
+
+    secondaryButtonText: "",
+    secondaryButtonLink: "",
+
+   featuredProducts: [],
+  }
+);
 setVideoTestimonials(
   data.videoTestimonials || []
 );
@@ -291,6 +313,19 @@ const uploadTestimonialVideo = async (
     });
   }
 };
+const uploadCompanyLogo = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  index: number
+) =>
+  uploadImage(
+    e,
+    (url) => {
+      const arr = [...testimonials];
+      arr[index].companyLogo = url;
+      setTestimonials(arr);
+    },
+    "Company logo uploaded"
+  );
 const uploadFloatingVideo = async (
   e: React.ChangeEvent<HTMLInputElement>
 ) => {
@@ -453,18 +488,8 @@ const uploadStoryImage = (
     "Story image uploaded"
   );
 
-const uploadCorporateImage = (
-  e: React.ChangeEvent<HTMLInputElement>
-) =>
-  uploadImage(
-    e,
-    (url) =>
-      setCorporate((prev) => ({
-        ...prev,
-        image: url,
-      })),
-    "Corporate image uploaded"
-  );
+const [showProductDropdown, setShowProductDropdown] =
+  useState(false);
 
 if (loading) {
   return (
@@ -1608,26 +1633,114 @@ return (
 
     {/* Image */}
 
-    <div>
+<div className="md:col-span-2">
 
-      <label className="label">
-        Corporate Image
-      </label>
+<div className="mb-5">
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={uploadCorporateImage}
-      />
+  <h3 className="font-semibold text-lg">
+    Featured Products
+  </h3>
 
-      {corporate.image && (
-        <img
-          src={corporate.image}
-          className="w-48 h-48 object-cover rounded-xl mt-3 border"
-        />
-      )}
+  <p className="text-sm text-stone-500 mt-1">
+    Select the products you want to show in the Corporate Slider.
+  </p>
+
+</div>
+
+<div className="relative">
+
+  <button
+    type="button"
+    onClick={() =>
+      setShowProductDropdown(!showProductDropdown)
+    }
+    className="flex w-full items-center justify-between rounded-lg border bg-white px-4 py-3"
+  >
+
+    <span>
+
+      {corporate.featuredProducts.length
+        ? `${corporate.featuredProducts.length} Products Selected`
+        : "Select Products"}
+
+    </span>
+
+    <span>
+      ▼
+    </span>
+
+  </button>
+
+  {showProductDropdown && (
+
+    <div className="absolute z-50 mt-2 max-h-[350px] w-full overflow-y-auto rounded-xl border bg-white shadow-xl">
+
+      {products.map((product) => {
+
+        const checked = corporate.featuredProducts.includes(product._id);
+
+        return (
+
+          <label
+            key={product._id}
+            className="flex cursor-pointer items-center gap-4 border-b p-3 hover:bg-stone-50"
+          >
+
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={(e) => {
+
+                if (e.target.checked) {
+
+    setCorporate({
+  ...corporate,
+  featuredProducts: [
+    ...corporate.featuredProducts,
+    product._id,
+  ],
+});
+
+                } else {
+
+        setCorporate({
+  ...corporate,
+  featuredProducts: corporate.featuredProducts.filter(
+    (id) => id !== product._id
+  ),
+});
+
+                }
+
+              }}
+            />
+
+            <img
+              src={product.imageUrl}
+              className="h-14 w-14 rounded-lg object-cover"
+            />
+
+            <div>
+
+              <p className="font-medium">
+                {product.name}
+              </p>
+
+            </div>
+
+          </label>
+
+        );
+
+      })}
 
     </div>
+
+  )}
+
+</div>
+
+</div>
 
     <div className="space-y-4">
 
@@ -1882,12 +1995,16 @@ return (
       onClick={() =>
         setTestimonials([
           ...testimonials,
-          {
-            name: "",
-            designation: "",
-            review: "",
-            image: "",
-          },
+{
+  name: "",
+  designation: "",
+  company: "",
+  title: "",
+  review: "",
+  image: "",
+  companyLogo: "",
+  linkedin: "",
+}
         ])
       }
     >
@@ -1943,7 +2060,75 @@ return (
             />
 
           </div>
+<div>
+  <label className="label">
+    Company
+  </label>
 
+  <input
+    className="input"
+    value={item.company}
+    onChange={(e) => {
+      const arr = [...testimonials];
+      arr[index].company = e.target.value;
+      setTestimonials(arr);
+    }}
+    placeholder="Merck Life Science"
+  />
+</div>
+<div className="md:col-span-2">
+  <label className="label">
+    Headline
+  </label>
+
+  <textarea
+    rows={2}
+    className="input"
+    value={item.title}
+    onChange={(e) => {
+      const arr = [...testimonials];
+      arr[index].title = e.target.value;
+      setTestimonials(arr);
+    }}
+    placeholder="Projects and case studies reinforced..."
+  />
+</div>
+<div>
+  <label className="label">
+    Company Logo
+  </label>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) =>
+      uploadCompanyLogo(e, index)
+    }
+  />
+
+  {item.companyLogo && (
+    <img
+      src={item.companyLogo}
+      className="mt-3 h-12 object-contain"
+    />
+  )}
+</div>
+<div className="md:col-span-2">
+  <label className="label">
+    LinkedIn URL
+  </label>
+
+  <input
+    className="input"
+    value={item.linkedin}
+    onChange={(e) => {
+      const arr = [...testimonials];
+      arr[index].linkedin = e.target.value;
+      setTestimonials(arr);
+    }}
+    placeholder="https://linkedin.com/in/..."
+  />
+</div>
           <div className="md:col-span-2">
 
             <label className="label">

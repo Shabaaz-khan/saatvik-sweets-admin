@@ -26,9 +26,10 @@ type FormState = {
   isAvailable: boolean;
   isFeatured: boolean;
   sortOrder: number;
-
+badge: string;
   variants: {
     weight: string;
+       discount: string;
     price: string;
   }[];
 };
@@ -43,10 +44,11 @@ const empty: FormState = {
   isAvailable: true,
   isFeatured: false,
   sortOrder: 0,
-
+ badge: "",
   variants: [
     {
       weight: "",
+       discount: "",
       price: "",
     },
   ],
@@ -112,14 +114,15 @@ setForm({
   isAvailable: p.isAvailable,
   isFeatured: p.isFeatured,
   sortOrder: p.sortOrder,
-
+ badge: p.badge || "",
   variants:
     p.variants && p.variants.length > 0
       ? p.variants.map((v) => ({
           weight: v.weight,
+           discount: String(v.discount ?? ""),
           price: String(v.price),
         }))
-      : [{ weight: "", price: "" }],
+      : [{ weight: "",discount: "", price: "" }],
 });
 setPreview(p.imageUrl || "");
 
@@ -160,10 +163,12 @@ const payload = {
   description: form.description.trim(),
 variants: form.variants.map(v => ({
   weight: v.weight,
+   discount: Number(v.discount),
   price: Number(v.price),
 })),
   category: form.category || null,
   types: form.types || null,
+    badge: form.badge.trim(),
 imageUrl,
   stock: Number(form.stock) || 0,
   isAvailable: form.isAvailable,
@@ -357,7 +362,7 @@ const filteredTypes = types.filter(
           ...form,
           variants: [
             ...form.variants,
-            { weight: "", price: "" },
+            { weight: "", discount: "",price: "" },
           ],
         })
       }
@@ -371,7 +376,7 @@ const filteredTypes = types.filter(
   {form.variants.map((variant, index) => (
     <div
       key={index}
-      className="grid grid-cols-[1fr_1fr_auto] gap-3"
+      className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3"
     >
       <input
         className="input"
@@ -384,18 +389,33 @@ const filteredTypes = types.filter(
         }}
       />
 
-      <input
-        className="input"
-        placeholder="₹180"
-        type="number"
-        value={variant.price}
-        onChange={(e) => {
-          const variants = [...form.variants];
-          variants[index].price = e.target.value;
-          setForm({ ...form, variants });
-        }}
-      />
+{/* Discount */}
 
+<input
+  className="input"
+  placeholder="Discount"
+  type="number"
+  value={variant.discount}
+  onChange={(e) => {
+    const variants = [...form.variants];
+    variants[index].discount = e.target.value;
+    setForm({ ...form, variants });
+  }}
+/>
+
+{/* Selling Price */}
+
+<input
+  className="input"
+  placeholder="Selling Price"
+  type="number"
+  value={variant.price}
+  onChange={(e) => {
+    const variants = [...form.variants];
+    variants[index].price = e.target.value;
+    setForm({ ...form, variants });
+  }}
+/>
       {form.variants.length > 1 && (
         <button
           type="button"
@@ -446,6 +466,27 @@ const filteredTypes = types.filter(
       </option>
     ))}
   </select>
+</div>
+<div>
+  <label className="label">Product Badge</label>
+
+  <input
+    type="text"
+    value={form.badge}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        badge: e.target.value,
+      })
+    }
+    className="input"
+    placeholder="e.g. Bestseller, Signature, New Arrival"
+    maxLength={30}
+  />
+
+  {/* <p className="mt-1 text-xs text-stone-500">
+    Leave empty if you don't want to display a badge.
+  </p> */}
 </div>
               <div>
                 <label className="label">Stock</label>

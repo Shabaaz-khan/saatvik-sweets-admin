@@ -27,6 +27,14 @@ export default function AboutCmsPage() {
     quote: "",
     story1: "",
     story2: "",
+    team: [
+  {
+    name: "",
+    designation: "",
+    image: "",
+    description: "",
+  },
+],
   });
 
   const [timeline, setTimeline] = useState([
@@ -120,6 +128,7 @@ const removeVideo = async () => {
         quote: data.quote || "",
         story1: data.story1 || "",
         story2: data.story2 || "",
+team: data.team || [],
       });
 
       setTimeline(data.timeline || []);
@@ -167,7 +176,46 @@ const removeVideo = async () => {
     setSaving(false);
 
   }
+const uploadTeamImage = async (
+  e: React.ChangeEvent<HTMLInputElement>,
+  index: number
+) => {
+  const file = e.target.files?.[0];
 
+  if (!file) return;
+
+  const formData = new FormData();
+
+  formData.append("image", file);
+  formData.append("folder", "about");
+
+  try {
+    const { data } = await axios.post(
+      `${API_URL}/api/upload`,
+      formData
+    );
+
+    const team = [...form.team];
+
+    team[index].image = data.imageUrl;
+
+    setForm({
+      ...form,
+      team,
+    });
+
+    toast({
+      message: "Image uploaded",
+      type: "success",
+    });
+
+  } catch {
+    toast({
+      message: "Upload failed",
+      type: "error",
+    });
+  }
+};
   if (loading) {
     return (
       <div className="p-10 text-center">
@@ -469,7 +517,157 @@ const removeVideo = async () => {
           </button>
 
         </div>
+{/* Team Members */}
+{/* Team Members */}
+<div className="card p-6">
+  <div className="flex items-center justify-between mb-5">
+    <h2 className="text-lg font-semibold">
+      Founders & Team Members
+    </h2>
 
+    <button
+      type="button"
+      className="btn-primary"
+      onClick={() =>
+        setForm({
+          ...form,
+          team: [
+            ...(form.team || []),
+            {
+              name: "",
+              designation: "",
+              image: "",
+              description: "",
+            },
+          ],
+        })
+      }
+    >
+      + Add Member
+    </button>
+  </div>
+
+  {(form.team || []).length === 0 && (
+    <div className="text-center py-8 text-stone-500 border rounded-xl">
+      No team members added.
+    </div>
+  )}
+
+  <div className="space-y-6">
+    {(form.team || []).map((member: any, index: number) => (
+      <div
+        key={index}
+        className="border rounded-xl p-5 bg-stone-50"
+      >
+        <div className="grid md:grid-cols-2 gap-5">
+
+          {/* Name */}
+          <div>
+            <label className="label">
+              Name
+            </label>
+
+            <input
+              className="input"
+              value={member.name}
+              onChange={(e) => {
+                const team = [...form.team];
+                team[index].name = e.target.value;
+                setForm({
+                  ...form,
+                  team,
+                });
+              }}
+            />
+          </div>
+
+          {/* Designation */}
+          <div>
+            <label className="label">
+              Designation
+            </label>
+
+            <input
+              className="input"
+              value={member.designation}
+              onChange={(e) => {
+                const team = [...form.team];
+                team[index].designation = e.target.value;
+                setForm({
+                  ...form,
+                  team,
+                });
+              }}
+            />
+          </div>
+
+        </div>
+
+        {/* Description */}
+        <div className="mt-5">
+          <label className="label">
+            Description
+          </label>
+
+          <textarea
+            rows={4}
+            className="input"
+            value={member.description}
+            onChange={(e) => {
+              const team = [...form.team];
+              team[index].description = e.target.value;
+              setForm({
+                ...form,
+                team,
+              });
+            }}
+          />
+        </div>
+
+        {/* Image */}
+        <div className="mt-5">
+          <label className="label">
+            Profile Image
+          </label>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              uploadTeamImage(e, index)
+            }
+          />
+
+          {member.image && (
+            <img
+              src={member.image}
+              alt={member.name}
+              className="mt-4 h-32 w-32 rounded-full object-cover border"
+            />
+          )}
+        </div>
+
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            className="btn-secondary bg-red-500 text-white hover:bg-red-600"
+            onClick={() => {
+              const team = [...form.team];
+              team.splice(index, 1);
+
+              setForm({
+                ...form,
+                team,
+              });
+            }}
+          >
+            Remove Member
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
         <div className="flex justify-end">
 
           <button
