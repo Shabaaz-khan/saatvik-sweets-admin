@@ -3,6 +3,7 @@ import axios from "axios";
 import { API_URL } from "../lib/config";
 import CareerApplicationModal from "./CareerApplicationModal";
 import { useToast } from "../lib/toast";
+import { Eye, EyeIcon, Trash2 } from "lucide-react";
 type Application = {
   _id: string;
   fullName: string;
@@ -181,15 +182,15 @@ const filteredApplications = applications.filter((item) => {
 
 <div className="flex items-center justify-center gap-2">
 
-  <button
-    onClick={() => {
-      setSelectedApplication(item);
-      setOpenModal(true);
-    }}
-    className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-  >
-    View
-  </button>
+<button
+  onClick={() => {
+    setSelectedApplication(item);
+    setOpenModal(true);
+  }}
+  className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700"
+>
+  <EyeIcon className="h-5 w-5 text-white" />
+</button>
 
 <button
   onClick={async () => {
@@ -223,9 +224,9 @@ const filteredApplications = applications.filter((item) => {
 });
     }
   }}
-  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+    className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
 >
-  Delete
+  <Trash2 size={18} />
 </button>
 
 </div>

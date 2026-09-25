@@ -37,7 +37,7 @@ variants: {
 
   types: Types | null;
 
-  imageUrl: string;
+  images: string[];
 
   stock: number;
 
@@ -157,3 +157,69 @@ export interface CorporatePage {
 
   formDescription: string;
 }
+export type Review = {
+  _id: string;
+
+  customerName: string;
+  customerImage: string;
+
+  platformName: string;
+  platformLogo: string;
+
+  rating: number;
+
+  review: string;
+
+  reviewDate: string;
+
+  cardPosition: "left" | "right" | "bottom";
+
+  displayOrder: number;
+
+  featured: boolean;
+
+  isActive: boolean;
+
+  // Review Section CMS
+
+  sectionHeading: string;
+
+  sectionSubHeading: string;
+
+  centerImage: string;
+
+  averageRating: string;
+
+  totalCustomers: string;
+
+  totalProducts: string;
+
+  purityPercentage: string;
+
+  createdAt?: string;
+
+  updatedAt?: string;
+};
+export type ReviewSettings = {
+  _id: string;
+
+  heading: string;
+
+  subHeading: string;
+
+  centerImage: string;
+
+  averageRating: string;
+
+  totalCustomers: string;
+
+  totalProducts: string;
+
+  purityPercentage: string;
+
+  autoSlide: boolean;
+
+  slideDuration: number;
+
+  showStats: boolean;
+};

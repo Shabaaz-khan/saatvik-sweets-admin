@@ -8,6 +8,13 @@ const CareerSchema = new mongoose.Schema(
       trim: true,
     },
 
+    slug: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+
     department: {
       type: String,
       default: "",
@@ -76,5 +83,18 @@ const CareerSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+CareerSchema.pre("validate", function (next) {
+  if (this.title && !this.slug) {
+    this.slug = this.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+  }
+
+  next();
+});
 
 export default mongoose.model("Career", CareerSchema);

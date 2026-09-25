@@ -231,3 +231,105 @@ export async function updateContactPage(payload: any) {
   const { data } = await api.put("/contact-page", payload);
   return data;
 }
+// =======================
+// Reviews
+// =======================
+
+export const getReviews = async () => {
+  const { data } = await api.get("/reviews");
+  return data;
+};
+
+export const createReview = async (payload: any) => {
+  const { data } = await api.post("/reviews", payload);
+  return data;
+};
+
+export const updateReview = async (
+  id: string,
+  payload: any
+) => {
+  const { data } = await api.put(`/reviews/${id}`, payload);
+  return data;
+};
+
+export const deleteReview = async (id: string) => {
+  const { data } = await api.delete(`/reviews/${id}`);
+  return data;
+};
+// =======================
+// Review Settings
+// =======================
+
+export const getReviewSettings = async () => {
+  const { data } = await api.get("/review-settings");
+  return data;
+};
+
+export const updateReviewSettings = async (
+  payload: any
+) => {
+  const { data } = await api.put(
+    "/review-settings",
+    payload
+  );
+
+  return data;
+};
+// =======================
+// Portfolio CMS
+// =======================
+
+export async function getPortfolioPage() {
+  const { data } = await api.get("/portfolio-page");
+  return data;
+}
+
+export async function updatePortfolioPage(payload: any) {
+  const { data } = await api.put(
+    "/portfolio-page",
+    payload
+  );
+
+  return data;
+}
+// =======================
+// Celebrity Profiles
+// =======================
+
+export async function getCelebrityProfiles() {
+  const res = await api.get("/celebrity-profile");
+
+  return res.data;
+}
+
+export async function createCelebrityProfile(data: any) {
+  const res = await api.post(
+    "/celebrity-profile",
+    data
+  );
+
+  return res.data;
+}
+
+export async function updateCelebrityProfile(
+  id: string,
+  data: any
+) {
+  const res = await api.put(
+    `/celebrity-profile/${id}`,
+    data
+  );
+
+  return res.data;
+}
+
+export async function deleteCelebrityProfile(
+  id: string
+) {
+  const res = await api.delete(
+    `/celebrity-profile/${id}`
+  );
+
+  return res.data;
+}

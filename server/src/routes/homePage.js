@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
   try {
 let page = await HomePage.findOne().populate({
   path: "corporate.featuredProducts",
-  select: "name slug imageUrl",
+ select: "name slug images",
 });
 
     if (!page) {
@@ -140,7 +140,7 @@ await page.save();
 
 page = await HomePage.findById(page._id).populate({
   path: "corporate.featuredProducts",
-  select: "name slug imageUrl",
+  select: "name slug images",
 });
     }
 

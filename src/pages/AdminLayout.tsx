@@ -14,12 +14,15 @@ import {
    Building2,
    Settings ,
      Globe,
+       PanelsTopLeft ,
   Home,
   Info,
   ShieldCheck,
   LayoutList,
   Contact,
   Briefcase,
+  UserRound ,
+  MessageSquare,
 } from 'lucide-react';
 
 
@@ -75,6 +78,11 @@ export default function AdminLayout() {
   label: "Career Applications",
   icon: Briefcase,
 },
+{
+  label: "Reviews",
+  icon: MessageSquare,
+  path: "/reviews",
+}
 // {
 //   path: "/settings",
 //   label: "Settings",
@@ -203,6 +211,19 @@ const logout = () => {
     <Contact className="w-[18px] h-[18px]" />
     Contact CMS
   </NavLink>
+      <NavLink
+    to="/website/review-settings"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <Settings className="w-[18px] h-[18px]" />
+    Review Settings
+  </NavLink>
   <NavLink
     to="/website/legal"
     className={({ isActive }) =>
@@ -215,6 +236,32 @@ const logout = () => {
   >
     <ShieldCheck className="w-[18px] h-[18px]" />
     Leagal CMS
+  </NavLink>
+    <NavLink
+    to="/website/portfolio"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <PanelsTopLeft  className="w-[18px] h-[18px]" />
+    Portfolio CMS
+  </NavLink>
+    <NavLink
+    to="/website/celebrity-profile"
+    className={({ isActive }) =>
+      `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+        isActive
+          ? "bg-rose-50 text-rose-700 border border-rose-100"
+          : "text-stone-600 hover:bg-stone-100"
+      }`
+    }
+  >
+    <UserRound className="w-[18px] h-[18px]" />
+    Celebrity Profile CMS
   </NavLink>
 </div>
 <NavLink

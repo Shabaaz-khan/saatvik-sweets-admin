@@ -23,6 +23,10 @@ import addressRoutes from "./routes/address.js";
 import ContactPage  from "./routes/contactPage.js";
 import careerRoutes from "./routes/careers.js";
 import careerApplicationRoutes from "./routes/careerApplications.js";
+import reviewRoutes from "./routes/reviews.js";
+import reviewSettingsRoutes from "./routes/reviewSettings.js";
+import portfolioPageRoutes from "./routes/portfolioPage.js";
+import CelebrityProfileRoutes from "./routes/celebrityProfile.js";
 const app = express();
 
 app.use(cors({
@@ -53,6 +57,10 @@ app.use("/api/customer", customerAuthRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/careers", careerRoutes);
 app.use( "/api/career-applications", careerApplicationRoutes );
+app.use("/api/reviews", reviewRoutes);
+app.use( "/api/review-settings", reviewSettingsRoutes );
+app.use("/api/portfolio-page", portfolioPageRoutes);
+app.use("/api/celebrity-profile", CelebrityProfileRoutes);
 // Central error handler
 app.use((err, _req, res, _next) => {
   console.error(err);

@@ -21,7 +21,7 @@ type FormState = {
   description: string;
   category: string;
   types: string;
-  imageUrl: string;
+ images: string[];
   stock: string;
   isAvailable: boolean;
   isFeatured: boolean;
@@ -39,7 +39,7 @@ const empty: FormState = {
   description: "",
   category: "",
   types: "",
-  imageUrl: "",
+ images: [],
   stock: "0",
   isAvailable: true,
   isFeatured: false,
@@ -66,9 +66,14 @@ export default function ProductsPage() {
   const [form, setForm] = useState<FormState>(empty);
   const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
-const [selectedImage, setSelectedImage] = useState<File | null>(null);
+const [existingImages, setExistingImages] =
+useState<string[]>([]);
 
-const [preview, setPreview] = useState("");
+const [selectedImages, setSelectedImages] =
+useState<File[]>([]);
+
+const [previews, setPreviews] =
+useState<string[]>([]);
   const load = async () => {
     setLoading(true);
     try {
@@ -94,41 +99,43 @@ const openNew = () => {
   setEditing(null);
 
   setForm(empty);
+setExistingImages([]);
+ setSelectedImages([]);
 
-  setSelectedImage(null);
-
-  setPreview("");
+setPreviews([]);
 
   setShowModal(true);
 
 };  
 const openEdit = (p: Product) => {
-    setEditing(p);
-setForm({
-  name: p.name,
-  description: p.description,
-  category: p.category?._id || "",
-  types: p.types?._id || "",
-  imageUrl: p.imageUrl,
-  stock: String(p.stock),
-  isAvailable: p.isAvailable,
-  isFeatured: p.isFeatured,
-  sortOrder: p.sortOrder,
- badge: p.badge || "",
-  variants:
-    p.variants && p.variants.length > 0
-      ? p.variants.map((v) => ({
-          weight: v.weight,
-           discount: String(v.discount ?? ""),
-          price: String(v.price),
-        }))
-      : [{ weight: "",discount: "", price: "" }],
-});
-setPreview(p.imageUrl || "");
+  setEditing(p);
 
-setSelectedImage(null);
-    setShowModal(true);
-  };
+  setForm({
+    name: p.name,
+    description: p.description,
+    category: p.category?._id || "",
+    types: p.types?._id || "",
+    images: p.images || [],
+    stock: String(p.stock),
+    isAvailable: p.isAvailable,
+    isFeatured: p.isFeatured,
+    sortOrder: p.sortOrder,
+    badge: p.badge || "",
+    variants:
+      p.variants && p.variants.length > 0
+        ? p.variants.map((v) => ({
+            weight: v.weight,
+            discount: String(v.discount ?? ""),
+            price: String(v.price),
+          }))
+        : [{ weight: "", discount: "", price: "" }],
+  });
+
+setExistingImages(p.images || []);
+setSelectedImages([]);
+setPreviews([]);
+  setShowModal(true);
+};
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,22 +146,26 @@ if (
 ) {
   return;
 }    setSaving(true);
-    let imageUrl = form.imageUrl;
-    const oldImage = form.imageUrl;
-    if (selectedImage) {
+let imageUrls = [...existingImages];
+const oldImages = [...form.images];
+if (selectedImages.length > 0) {
+
+  for (const image of selectedImages) {
 
     const formData = new FormData();
 
-    formData.append("image", selectedImage);
+    formData.append("image", image);
 
     formData.append("folder", "products");
 
     const upload = await axios.post(
-    `${API_URL}/api/upload`,
-    formData
-);
+      `${API_URL}/api/upload`,
+      formData
+    );
 
-    imageUrl = upload.data.imageUrl;
+    imageUrls.push(upload.data.imageUrl);
+
+  }
 
 }
     try {
@@ -163,13 +174,16 @@ const payload = {
   description: form.description.trim(),
 variants: form.variants.map(v => ({
   weight: v.weight,
-   discount: Number(v.discount),
+   discount:
+    v.discount.trim() === ""
+      ? null
+      : Number(v.discount),
   price: Number(v.price),
 })),
   category: form.category || null,
   types: form.types || null,
     badge: form.badge.trim(),
-imageUrl,
+images: imageUrls,
   stock: Number(form.stock) || 0,
   isAvailable: form.isAvailable,
   isFeatured: form.isFeatured,
@@ -178,27 +192,33 @@ imageUrl,
       if (editing) {
         
 await updateProduct(editing._id, payload);
-         if (
-        oldImage &&
-        oldImage !== imageUrl
-    ) {
-        await axios.delete(
-            `${API_URL}/api/upload`,
-            {
-                data: {
-                    imageUrl: oldImage,
-                },
-            }
-        );
-    }
+if (editing) {
+
+  const removedImages = oldImages.filter(
+    (img) => !imageUrls.includes(img)
+  );
+
+  for (const image of removedImages) {
+    await axios.delete(
+      `${API_URL}/api/upload`,
+      {
+        data: {
+          imageUrl: image,
+        },
+      }
+    );
+  }
+
+}
+
       } else {
 await createProduct(payload);
       }
       toast({ message: editing ? 'Product updated' : 'Product created', type: 'success' });
       setShowModal(false);
-      setSelectedImage(null);
+ setSelectedImages([]);
 
-setPreview("");
+setPreviews([]);
 
 setForm(empty);
       load();
@@ -211,12 +231,14 @@ setForm(empty);
   const remove = async (p: Product) => {
     if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
     try {
-if (p.imageUrl) {
-  await axios.delete(`${API_URL}/api/upload`, {
-    data: {
-      imageUrl: p.imageUrl,
-    },
-  });
+if (p.images && p.images.length > 0) {
+  for (const image of p.images) {
+    await axios.delete(`${API_URL}/api/upload`, {
+      data: {
+        imageUrl: image,
+      },
+    });
+  }
 }
 
 await deleteProduct(p._id);
@@ -286,9 +308,9 @@ const filteredTypes = types.filter(
                   <tr key={p._id} className="hover:bg-stone-50/60 transition">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        {p.imageUrl ? (
+                       {p.images?.length ? (
 <img
-  src={p.imageUrl}
+ src={p.images[0]}
   alt={p.name}
   className="w-10 h-10 rounded-lg object-cover"
 />
@@ -395,7 +417,7 @@ const filteredTypes = types.filter(
   className="input"
   placeholder="Discount"
   type="number"
-  value={variant.discount}
+  value={variant.discount ?? ""}
   onChange={(e) => {
     const variants = [...form.variants];
     variants[index].discount = e.target.value;
@@ -493,69 +515,93 @@ const filteredTypes = types.filter(
                 <input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="input" />
               </div>
             </div>
-<div>
-  <label className="label">Product Image</label>
+<div className="space-y-4">
+
+  {(existingImages.length > 0 || previews.length > 0) && (
+
+    <div className="grid grid-cols-3 gap-3">
+
+      {[...existingImages, ...previews].map((image, index) => (
+
+      <div
+  key={index}
+  className="relative w-24 h-24"
+>
+          <img
+            src={image}
+           className="w-full h-full rounded-lg object-cover border border-stone-200"
+          />
+
+          <button
+            type="button"
+            onClick={() => {
+              if (index < existingImages.length) {
+
+                setExistingImages(prev =>
+                  prev.filter((_, i) => i !== index)
+                );
+
+              } else {
+
+                const newIndex =
+                  index - existingImages.length;
+
+                setPreviews(prev =>
+                  prev.filter((_, i) => i !== newIndex)
+                );
+
+                setSelectedImages(prev =>
+                  prev.filter((_, i) => i !== newIndex)
+                );
+
+              }
+            }}
+            className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white shadow hover:bg-red-700"
+
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+
+      ))}
+
+    </div>
+
+  )}
 
   <label className="border-2 border-dashed border-stone-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-rose-500 transition">
 
-    {preview ? (
+    <ImageIcon className="w-10 h-10 text-stone-400 mb-2" />
 
-      <img
-        src={preview}
-        className="w-36 h-36 object-cover rounded-lg"
-      />
-
-    ) : (
-
-      <>
-        <ImageIcon className="w-10 h-10 text-stone-400 mb-2" />
-
-        <p className="text-sm text-stone-500">
-          Click to upload product image
-        </p>
-      </>
-
-    )}
+    <p className="text-sm text-stone-500">
+      Click to upload product images
+    </p>
 
     <input
       type="file"
+      multiple
       accept="image/*"
       className="hidden"
       onChange={(e) => {
 
-        const file = e.target.files?.[0];
+        const files = Array.from(e.target.files || []);
 
-        if (!file) return;
+        setSelectedImages(prev => [
+          ...prev,
+          ...files,
+        ]);
 
-        setSelectedImage(file);
-
-        setPreview(URL.createObjectURL(file));
+        setPreviews(prev => [
+          ...prev,
+          ...files.map(file =>
+            URL.createObjectURL(file)
+          ),
+        ]);
 
       }}
     />
+
   </label>
-
-  {preview && (
-
-    <button
-      type="button"
-      onClick={() => {
-
-        setSelectedImage(null);
-
-        setPreview("");
-            setForm({
-        ...form,
-        imageUrl: "",
-    });
-
-      }}
-      className="mt-3 text-sm text-red-600"
-    >
-      Remove Image
-    </button>
-
-  )}
 
 </div>
             <div className="grid grid-cols-2 gap-4">

@@ -11,11 +11,10 @@ variants: [
       type: String,
       required: true,
     },
-        discount: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+    discount: {
+  type: Number,
+  default: null,
+},
     price: {
       type: Number,
       required: true,
@@ -30,7 +29,7 @@ badge: {
 },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
     types: { type: mongoose.Schema.Types.ObjectId, ref: "Types", default: null, },
-    imageUrl: { type: String, default: '' },
+    images: [ { type: String, }, ],
     stock: { type: Number, default: 0, min: 0 },
     isAvailable: { type: Boolean, default: true },
     isFeatured: { type: Boolean, default: false },

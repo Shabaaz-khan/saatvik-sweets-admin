@@ -26,9 +26,11 @@ router.get("/", async (req, res) => {
 GET SINGLE CAREER
 */
 
-router.get("/:id", async (req, res) => {
+router.get("/:slug", async (req, res) => {
   try {
-    const career = await Career.findById(req.params.id);
+    const career = await Career.findOne({
+      slug: req.params.slug,
+    });
 
     if (!career) {
       return res.status(404).json({
@@ -50,6 +52,13 @@ CREATE CAREER
 
 router.post("/", async (req, res) => {
   try {
+    req.body.slug = req.body.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+
     const career = await Career.create(req.body);
 
     res.json(career);
@@ -66,11 +75,21 @@ UPDATE CAREER
 
 router.put("/:id", async (req, res) => {
   try {
+    if (req.body.title) {
+      req.body.slug = req.body.title
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+    }
+
     const career = await Career.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
         new: true,
+        runValidators: true,
       }
     );
 
@@ -81,7 +100,6 @@ router.put("/:id", async (req, res) => {
     });
   }
 });
-
 /*
 DELETE CAREER
 */

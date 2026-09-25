@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../lib/config";
-
+import { useToast } from "../lib/toast";
 export default function CareersPage() {
     const [open, setOpen] = useState(false);
 const [editingId, setEditingId] = useState<string | null>(null);
+
 const [career, setCareer] = useState({
   title: "",
   department: "",
@@ -20,7 +21,7 @@ const [career, setCareer] = useState({
   sortOrder: 0,
 });
   const [careers, setCareers] = useState([]);
-
+const toast = useToast();
   useEffect(() => {
     loadCareers();
   }, []);
@@ -38,60 +39,58 @@ const [career, setCareer] = useState({
   };
 const saveCareer = async () => {
   try {
-if (editingId) {
+    if (editingId) {
+      await axios.put(
+        `${API_URL}/api/careers/${editingId}`,
+        {
+          ...career,
 
-  await axios.put(
-    `${API_URL}/api/careers/${editingId}`,
-    {
-      ...career,
+          responsibilities: career.responsibilities
+            .split("\n")
+            .filter(Boolean),
 
-      responsibilities:
-        career.responsibilities
-          .split("\n")
-          .filter(Boolean),
+          requirements: career.requirements
+            .split("\n")
+            .filter(Boolean),
 
-      requirements:
-        career.requirements
-          .split("\n")
-          .filter(Boolean),
+          benefits: career.benefits
+            .split("\n")
+            .filter(Boolean),
+        }
+      );
+    } else {
+      await axios.post(
+        `${API_URL}/api/careers`,
+        {
+          ...career,
 
-      benefits:
-        career.benefits
-          .split("\n")
-          .filter(Boolean),
+          responsibilities: career.responsibilities
+            .split("\n")
+            .filter(Boolean),
+
+          requirements: career.requirements
+            .split("\n")
+            .filter(Boolean),
+
+          benefits: career.benefits
+            .split("\n")
+            .filter(Boolean),
+        }
+      );
     }
-  );
-
-} else {
-
-  await axios.post(
-    `${API_URL}/api/careers`,
-    {
-      ...career,
-
-      responsibilities:
-        career.responsibilities
-          .split("\n")
-          .filter(Boolean),
-
-      requirements:
-        career.requirements
-          .split("\n")
-          .filter(Boolean),
-
-      benefits:
-        career.benefits
-          .split("\n")
-          .filter(Boolean),
-    }
-  );
-
-}
 
     await loadCareers();
 
+    toast({
+      type: "success",
+      message: editingId
+        ? "Career updated successfully!"
+        : "Career created successfully!",
+    });
+
     setOpen(false);
-setEditingId(null);
+    setEditingId(null);
+
     setCareer({
       title: "",
       department: "",
@@ -106,9 +105,13 @@ setEditingId(null);
       isActive: true,
       sortOrder: 0,
     });
-
   } catch (err) {
-    console.log(err);
+    console.error(err);
+
+    toast({
+      type: "error",
+      message: "Failed to save career.",
+    });
   }
 };
 const deleteCareer = async (id: string) => {
@@ -123,9 +126,19 @@ const deleteCareer = async (id: string) => {
       `${API_URL}/api/careers/${id}`
     );
 
-    loadCareers();
+    await loadCareers();
+
+    toast({
+      type: "success",
+      message: "Career deleted successfully!",
+    });
   } catch (err) {
-    console.log(err);
+    console.error(err);
+
+    toast({
+      type: "error",
+      message: "Failed to delete career.",
+    });
   }
 };
   return (
@@ -252,7 +265,7 @@ const deleteCareer = async (id: string) => {
 
         <button
           onClick={() => setOpen(false)}
-          className="text-2xl"
+         className="flex h-10 w-10 items-center justify-center rounded-full text-2xl transition-all duration-300 hover:bg-red-100 hover:text-red-600"
         >
           ×
         </button>
@@ -331,7 +344,7 @@ const deleteCareer = async (id: string) => {
       </label>
 
       <select
-        className="input"
+        className="input cursor-pointer"
         value={career.employmentType}
         onChange={(e) =>
           setCareer({
@@ -538,7 +551,7 @@ const deleteCareer = async (id: string) => {
   setOpen(false);
   setEditingId(null);
 }}
-    className="rounded-lg border px-6 py-3"
+    className="rounded-xl border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition-all duration-300 hover:bg-gray-100 hover:border-gray-400"
   >
     Cancel
   </button>
@@ -546,7 +559,7 @@ const deleteCareer = async (id: string) => {
 <button
   type="button"
   onClick={saveCareer}
-  className="rounded-lg border bg-danger px-6 py-3"
+  className="rounded-xl bg-[rgb(126,0,62)] px-6 py-3 font-semibold !text-white transition-all duration-300 hover:bg-[rgb(100,0,50)] hover:shadow-lg"
 >
   Save Career
 </button>

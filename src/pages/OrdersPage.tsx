@@ -27,7 +27,17 @@ export default function OrdersPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selected, setSelected] = useState<Order | null>(null);
   const [updating, setUpdating] = useState(false);
+useEffect(() => {
+  if (selected) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
 
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [selected]);
   const load = async () => {
     setLoading(true);
     try {
@@ -131,9 +141,9 @@ await updateOrder(selected._id, {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity" onClick={() => setSelected(null)} />
-          <div className="relative h-full w-full max-w-xl bg-white shadow-2xl overflow-y-auto bg-white shadow-2xl h-full overflow-y-auto animate-slide-in">
+        <div className="fixed inset-0 z-[9999]">
+          <div   className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelected(null)} />
+          <div className=" fixed right-0 top-0 h-screen w-full max-w-xl bg-white shadow-2xl animate-slide-in flex flex-col z-[10000] " >
             <div className="sticky top-0 bg-white border-b border-stone-100 px-6 py-4 flex items-center justify-between">
               <div>
                 <h2 className="font-display text-xl font-semibold text-stone-900">{selected.orderNumber}</h2>
@@ -142,7 +152,7 @@ await updateOrder(selected._id, {
               <button onClick={() => setSelected(null)} className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100"><X className="w-5 h-5" /></button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="h-[calc(100vh-90px)] overflow-y-auto p-6 space-y-6">
               <div className="flex flex-wrap gap-2">
                 <span className={`badge ${statusStyle[selected.status]}`}>{selected.status}</span>
                 <span className={`badge ${selected.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' : selected.paymentStatus === 'failed' ? 'bg-rose-50 text-rose-700' : 'bg-stone-100 text-stone-600'}`}>

@@ -90,12 +90,28 @@ const HomePageSchema = new mongoose.Schema(
         },
       ],
     },
-
+valuesSection: [
+  {
+    title: {
+      type: String,
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+  },
+],
     story: {
       label: String,
       title: String,
       description: String,
       image: String,
+        // New multiple images
+   images: {
+    type: [String],
+    default: [],
+  },
       buttonText: String,
       buttonLink: String,
     },
@@ -157,6 +173,68 @@ videoTestimonials: [
     videoUrl: String,
     name: String,
     designation: String,
+  },
+],
+specialGuests: [
+  {
+    name: {
+      type: String,
+      default: "",
+    },
+
+    designation: {
+      type: String,
+      default: "",
+    },
+
+    slug: {
+      type: String,
+      required: true,
+    },
+
+    image: {
+      type: String,
+      default: "",
+    },
+
+    description: {
+      type: String,
+      default: "",
+    },
+
+    backgroundColor: {
+      type: String,
+      default: "#3A1420",
+    },
+
+    media: [
+      {
+        type: {
+          type: String,
+          enum: ["image", "video"],
+        },
+
+        url: {
+          type: String,
+          default: "",
+        },
+
+        title: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
+
+    sortOrder: {
+      type: Number,
+      default: 0,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
 ],
 testimonials: [

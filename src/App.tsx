@@ -26,6 +26,10 @@ import ContactCmsPage from "./pages/ContactCmsPage";
 import LegalPage from "./pages/LegalPage";
 import CareersPage from "./pages/CareersPage";
 import CareerApplicationsPage from "./pages/CareerApplicationsPage";
+import ReviewsPage from "./pages/ReviewsPage";
+import ReviewSettingsPage from "./pages/ReviewSettingsPage";
+import PortfolioCmsPage from "./pages/PortfolioCmsPage";
+import CelebrityProfilePage from "./pages/CelebrityProfilePage";
 // import StorePage from './pages/StorePage';
 import { Candy, Loader2 } from 'lucide-react';
 
@@ -108,6 +112,14 @@ return (
   path="/corporate"
   element={<CorporateInquiriesPage />}
 />
+<Route
+  path="/reviews"
+  element={<ReviewsPage />}
+/>
+<Route
+  path="/website/review-settings"
+  element={<ReviewSettingsPage />}
+/>
     <Route
   path="/settings"
   element={<SettingsPage />}
@@ -115,6 +127,10 @@ return (
 <Route
   path="/website/corporate"
   element={<CorporateCmsPage />}
+/>
+<Route
+  path="/website/portfolio"
+  element={<PortfolioCmsPage />}
 />
 <Route
   path="/website/menu"
@@ -131,6 +147,10 @@ return (
 <Route
   path="/website/contact"
   element={<ContactCmsPage />}
+/>
+<Route
+  path="/website/celebrity-profile"
+  element={<CelebrityProfilePage />}
 />
 <Route
   path="/website/legal"
